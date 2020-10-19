@@ -4,11 +4,10 @@ from pathlib import Path
 
 if __name__ == '__main__':
 
-    path = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_datalake\documents_data')
+    path = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\dw\documents_data')
 
     dfs = [pd.read_parquet(p) for p in path.iterdir()]
-
-    df = pd.concat(dfs)
+    df = pd.concat(dfs, ignore_index=True)
 
     df = df.sort_values('time')
 
