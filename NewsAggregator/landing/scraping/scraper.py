@@ -1,82 +1,19 @@
 import uuid
 import pandas as pd
-import psycopg2
 import requests
 from bs4 import BeautifulSoup
 from pathlib import Path
 
+from utils.auditable_etl import AuditableEtl
 
-class Scraper:
+
+class Scraper(AuditableEtl):
 
     def __init__(self, process_name: str, path_destination: Path):
+        super().__init__()
 
         self.process_name = process_name
         self.path_destination = path_destination
-
-        auditdb_url = '127.0.0.1'
-        auditdb_name = 'auditdb'
-        user_name = 'postgres'
-        user_password = 'postgres'
-
-        self.connection = psycopg2.connect(
-            host=auditdb_url, database=auditdb_name,
-            user=user_name, password=user_password
-        )
-        self.connection.autocommit = True
-        self.cursor = self.connection.cursor()
-
-    def __del__(self):
-        if self.connection:
-            self.cursor.close()
-            self.connection.close()
-
-    def run(self):
-
-        source = self.get_unprocessed_source()
-
-        if not source:
-            return
-
-        destination = self.get_destination()
-        audit_ids = self.start_audit(source, destination)
-
-        data = self.extract(source)
-        data = self.transform(data)
-        self.load(data, destination)
-
-        self.stop_audit(audit_ids)
-
-    def get_unprocessed_source(self):
-        query = f"select * from get_unprocessed_urls('{self.process_name}');"
-        self.cursor.execute(query)
-        return self.cursor.fetchall()
-
-    def get_destination(self):
-        return f'{self.path_destination.as_posix()}/{{}}/{uuid.uuid1()}.csv'
-
-    def start_audit(self, source, destination):
-
-        query = []
-        for url_id, url, source_cite in source:
-            path_destination = destination.format(source_cite)
-            query += [f"('{url_id}','{path_destination}','{self.process_name}')"]
-
-        query = ','.join(query)
-        query = f"insert into url_audit (url_id, destination, process_name) values {query} returning id;"
-
-        self.cursor.execute(query)
-        audit_ids = self.cursor.fetchall()
-
-        return audit_ids
-
-    def stop_audit(self, audit_ids):
-
-        audit_ids = [str(_[0]) for _ in audit_ids]
-        audit_ids = ','.join(audit_ids)
-        audit_ids = f'({audit_ids})'
-
-        query = f'update url_audit set stop_time = now() where id in {audit_ids};'
-        self.cursor.execute(query)
 
     def extract(self, source):
 
@@ -103,6 +40,38 @@ class Scraper:
             path = destination.format(source)
             pages = pages[['url_id', 'html']]
             pages.to_csv(path, index=False)
+
+    def start_audit(self, source, destination):
+
+        query = []
+        for url_id, url, source_cite in source:
+            path_destination = destination.format(source_cite)
+            query += [f"('{url_id}','{path_destination}','{self.process_name}')"]
+
+        query = ','.join(query)
+        query = f"insert into url_audit (url_id, destination, process_name) values {query} returning id;"
+
+        self.cursor.execute(query)
+        audit_ids = self.cursor.fetchall()
+
+        return audit_ids
+
+    def stop_audit(self, audit_ids):
+
+        audit_ids = [str(_[0]) for _ in audit_ids]
+        audit_ids = ','.join(audit_ids)
+        audit_ids = f'({audit_ids})'
+
+        query = f'update url_audit set stop_time = now() where id in {audit_ids};'
+        self.cursor.execute(query)
+
+    def get_unprocessed_source(self):
+        query = f"select * from get_unprocessed_urls('{self.process_name}');"
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+
+    def get_destination(self):
+        return f'{self.path_destination.as_posix()}/{{}}/{uuid.uuid1()}.csv'
 
     def get_body(self, page):
         soup = BeautifulSoup(page, 'html.parser')
