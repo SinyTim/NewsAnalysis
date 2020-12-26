@@ -1,5 +1,5 @@
-from bs4 import BeautifulSoup
 import pandas as pd
+from bs4 import BeautifulSoup
 
 from staging.staging_etl import StagingHtmlEtl
 
@@ -7,9 +7,7 @@ from staging.staging_etl import StagingHtmlEtl
 class StagingEtlMedicine(StagingHtmlEtl):
 
     def __init__(self, **kwargs):
-
         columns = ['header', 'time', 'document']
-
         super().__init__(columns=columns, **kwargs)
 
     def parse_html(self, html):
@@ -36,9 +34,7 @@ class StagingEtlMedicine(StagingHtmlEtl):
 
         header = header.strip()
         document = document.strip()
-
         time = self._parse_russian_date(time)
-        time = pd.to_datetime(time, format='%d.%m.%Y')
 
         return header, time, document
 
@@ -51,6 +47,10 @@ class StagingEtlMedicine(StagingHtmlEtl):
         day, month, year = date.split(' ')
         month = StagingEtlMedicine.months[month]
         date = '.'.join((day, month, year))
+
+        date = pd.to_datetime(date, format='%d.%m.%Y')
+        date = date.strftime('%Y-%m-%d %H:%M')
+
         return date
 
     months = {

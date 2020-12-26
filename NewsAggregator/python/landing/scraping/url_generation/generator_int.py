@@ -1,5 +1,5 @@
-import requests
 import pandas as pd
+import requests
 
 from landing.scraping.url_generation.generator import UrlGenerator
 
@@ -23,7 +23,7 @@ class UrlGeneratorWithIntState(UrlGenerator):
 
         while n_fails < self.max_n_fails:
 
-            url = self.get_urls_from_state(page_index)
+            url = self.get_url_with_state(page_index)
 
             response = requests.get(url)
 
@@ -40,7 +40,7 @@ class UrlGeneratorWithIntState(UrlGenerator):
         urls = pd.DataFrame(urls, columns=['url', 'url_response'])
         urls_bad = pd.DataFrame(urls_bad, columns=['url', 'url_response', 'status_code'])
 
-        stop_state = last_success_page_index + 1 if last_success_page_index else start_state
+        stop_state = self.increment_state(last_success_page_index) if last_success_page_index else start_state
 
         return urls['url_response'], urls_bad, stop_state
 
@@ -50,7 +50,7 @@ class UrlGeneratorWithIntState(UrlGenerator):
     def state_to_str(self, state):
         return str(state)
 
-    def get_urls_from_state(self, state):
+    def get_url_with_state(self, state):
         state = self.state_to_str(state)
         url = self.url_template.format(state)
         return url

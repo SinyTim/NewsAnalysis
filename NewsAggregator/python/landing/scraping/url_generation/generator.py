@@ -1,14 +1,15 @@
 import psycopg2
+import pandas as pd
 
 
 class UrlGenerator:
 
     def __init__(self, source: str, process_name: str, url_template: str, default_start_state: str):
 
-        auditdb_url = '127.0.0.1'
-        auditdb_name = 'auditdb'
+        auditdb_url = '34.123.127.77'
+        auditdb_name = 'dbaudit'
         user_name = 'postgres'
-        user_password = 'postgres'
+        user_password = 'P@ssw0rd'
 
         self.source = source
         self.process_name = process_name
@@ -17,7 +18,7 @@ class UrlGenerator:
 
         self.connection = psycopg2.connect(
             host=auditdb_url, database=auditdb_name,
-            user=user_name, password=user_password
+            user=user_name, password=user_password,
         )
         self.connection.autocommit = True
         self.cursor = self.connection.cursor()
@@ -28,6 +29,7 @@ class UrlGenerator:
             self.connection.close()
 
     def run(self):
+
         start_state = self.get_last_state()
 
         generation_id = self.start_audit(start_state)
@@ -51,7 +53,7 @@ class UrlGenerator:
     def state_to_str(self, state):
         raise NotImplementedError
 
-    def get_urls_from_state(self, state):
+    def get_url_with_state(self, state):
         raise NotImplementedError
 
     def increment_state(self, state):
@@ -76,17 +78,17 @@ class UrlGenerator:
         query = f"select stop_url_generation({generation_id}, '{stop_state}', {n_urls});"
         self.cursor.execute(query)
 
-    def write_urls(self, urls, generation_id: int):
+    def write_urls(self, urls: pd.Series, generation_id: int):
         values = urls.map(lambda url: f"('{url}',{generation_id})")
         values = ','.join(values)
         query = f'insert into urls (url, url_generation_id) values {values} on conflict (url) do nothing;'
         self.cursor.execute(query)
 
-    def write_bad_urls(self, bad_urls, generation_id: int):
+    def write_bad_urls(self, bad_urls: pd.DataFrame, generation_id: int):
         values = bad_urls.apply(
             lambda row: f"('{row['url']}',{generation_id},{row['status_code']},'{row['url_response']}')",
             axis=1
         )
         values = ','.join(values)
-        query = f'insert into bad_urls (url, url_generation_id, status_code, url_response) values {values};'
+        query = f'insert into urls_bad (url, url_generation_id, status_code, url_response) values {values};'
         self.cursor.execute(query)

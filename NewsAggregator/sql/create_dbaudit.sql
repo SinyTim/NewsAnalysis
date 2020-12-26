@@ -1,13 +1,13 @@
 
 
-drop database if exists auditdb;
-create database auditdb;
+drop database if exists dbaudit;
+create database dbaudit;
 
 
 drop table if exists audit;
-drop table if exists url_audit;
 drop table if exists errors;
-drop table if exists bad_urls;
+drop table if exists url_audit;
+drop table if exists urls_bad;
 drop table if exists urls;
 drop table if exists url_generation;
 
@@ -34,7 +34,7 @@ create table urls(
 );
 
 
-create table bad_urls(
+create table urls_bad(
     id                bigserial    primary key,
     url               varchar(256) not null,
     url_generation_id bigint       not null,
@@ -45,17 +45,6 @@ create table bad_urls(
 );
 
 
-create table errors(
-    id           bigserial    primary key,
-    url_id       bigint       not null,
-    error        varchar(512) not null,
-    process_name varchar(256) not null,
-    time         timestamptz  default now(),
-
-    foreign key (url_id) references urls(id)
-);
-
-
 create table url_audit(
     id           bigserial    primary key,
     url_id       bigint       not null,
@@ -63,6 +52,17 @@ create table url_audit(
     process_name varchar(256) not null,
     start_time   timestamptz  default now(),
     stop_time    timestamptz  null,
+
+    foreign key (url_id) references urls(id)
+);
+
+
+create table errors(
+    id           bigserial    primary key,
+    url_id       bigint       not null,
+    error        varchar(512) not null,
+    process_name varchar(256) not null,
+    time         timestamptz  default now(),
 
     foreign key (url_id) references urls(id)
 );

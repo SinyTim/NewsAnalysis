@@ -1,50 +1,66 @@
-from pathlib import Path
-import pandas as pd
 import uuid
+from pathlib import Path
 
-from utils.auditable_etl import AuditableEtl
+import pandas as pd
+import psycopg2
 
 
-class StageToDwEtl(AuditableEtl):
+class AuditableEtl:
 
-    def __init__(self, process_name, path_source: Path, path_destination: Path):
-        super().__init__()
-        self.process_name = process_name
+    def __init__(self, process_name: str,
+                 path_destination: Path,
+                 path_source: Path = None,
+                 destination_extension: str = None):
+
         self.path_source = path_source
         self.path_destination = path_destination
-        self.columns = ['url_id', 'header', 'time', 'document', 'tags']
+        self.process_name = process_name
+        self.destination_extension = destination_extension
 
         self.path_destination.mkdir(exist_ok=True)
 
+        auditdb_url = '34.123.127.77'
+        auditdb_name = 'dbaudit'
+        user_name = 'postgres'
+        user_password = 'P@ssw0rd'
+
+        self.connection = psycopg2.connect(
+            host=auditdb_url, database=auditdb_name,
+            user=user_name, password=user_password
+        )
+        self.connection.autocommit = True
+        self.cursor = self.connection.cursor()
+
+    def __del__(self):
+        if self.connection:
+            self.cursor.close()
+            self.connection.close()
+
+    def run(self):
+
+        source = self.get_unprocessed_source()
+
+        if not source:
+            return
+
+        destination = self.get_destination()
+
+        audit_ids = self.start_audit(source, destination)
+
+        data = self.extract(source)
+        data = self.transform(data)
+        self.load(data, destination)
+
+        self.stop_audit(audit_ids)
+
     def extract(self, source):
-        data = [pd.read_csv(path_file, parse_dates=True, infer_datetime_format=True) for path_file in source]
-        data = pd.concat(data, ignore_index=True)
-        return data
+        raise NotImplementedError
 
     def transform(self, data):
-
-        existing_columns = set(data.columns)
-        load_columns = set(self.columns)
-        not_existing_columns = list(load_columns - existing_columns)
-
-        data = data[existing_columns & load_columns]
-
-        for column_name in not_existing_columns:
-            data = data.assign(**{column_name: None})
-
-        bad_data = data[['url_id']][data['document'].isna()]
-        bad_data['error'] = 'empty document'
-        data = data.drop(bad_data.index)
-
-        return data, bad_data
+        raise NotImplementedError
 
     def load(self, data, destination):
-        data, bad_data = data
-
-        data.to_parquet(destination, index=False)
-
-        if len(bad_data) != 0:
-            self.write_bad_data(bad_data)
+        raise NotImplementedError
 
     def start_audit(self, source, destination):
 
@@ -69,6 +85,7 @@ class StageToDwEtl(AuditableEtl):
         self.cursor.execute(query)
 
     def get_unprocessed_source(self):
+        assert self.path_source is not None
 
         path_files = {path_file.as_posix() for path_file in self.path_source.iterdir()}
 
@@ -82,10 +99,11 @@ class StageToDwEtl(AuditableEtl):
         return path_unprocessed_files
 
     def get_destination(self):
-        path = self.path_destination / f'{uuid.uuid1()}.parquet'
+        destination_extension = f'.{self.destination_extension}' if self.destination_extension else ''
+        path = self.path_destination / f'{uuid.uuid1()}{destination_extension}'
         return path.as_posix()
 
-    def write_bad_data(self, bad_data):
+    def write_bad_data(self, bad_data: pd.DataFrame):
         values = bad_data.apply(lambda row: f"({row['url_id']},'{row['error']}','{self.process_name}')", axis=1)
         values = ','.join(values)
         query = f'insert into errors (url_id, error, process_name) values {values};'

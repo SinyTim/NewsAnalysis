@@ -1,3 +1,4 @@
+from landing.scraping.url_generation.generator_date import UrlGeneratorWithDateState
 from landing.scraping.url_generation.generator_int import UrlGeneratorWithIntState
 
 
@@ -5,14 +6,14 @@ def main():
 
     params = [
         {
-            'source': 'medicine_0',
+            'source': 'komzdrav',
             'process_name': 'url_generator_int',
             'url_template': 'https://komzdrav-minsk.gov.by/news/{}',
             'default_start_state': '1',
             'max_n_fails': 5,
         },
         {
-            'source': 'medicine_1',
+            'source': '4gkb',
             'process_name': 'url_generator_int',
             'url_template': 'https://4gkb.by/news/{}',
             'default_start_state': '1',
@@ -22,7 +23,7 @@ def main():
             'source': 'tutby',
             'process_name': 'url_generator_int',
             'url_template': 'https://news.tut.by/{}.html',
-            'default_start_state': '704500',
+            'default_start_state': '712783',
             'max_n_fails': 10,
         },
     ]
@@ -30,6 +31,16 @@ def main():
     for param in params:
         generator = UrlGeneratorWithIntState(**param)
         generator.run()
+
+    params = {
+        'source': 'naviny',
+        'process_name': 'url_generator_date',
+        'url_template': 'https://naviny.media/day/{}',
+        'default_start_state': '2020/12/24',
+    }
+
+    generator = UrlGeneratorWithDateState(**params)
+    generator.run()
 
 
 if __name__ == '__main__':

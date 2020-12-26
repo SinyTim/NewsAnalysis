@@ -1,3 +1,4 @@
+import pandas as pd
 from bs4 import BeautifulSoup
 
 from staging.staging_etl import StagingHtmlEtl
@@ -6,9 +7,7 @@ from staging.staging_etl import StagingHtmlEtl
 class StagingEtlTutby(StagingHtmlEtl):
 
     def __init__(self, **kwargs):
-
         columns = ['label', 'header', 'n_comments', 'time', 'document', 'tags']
-
         super().__init__(columns=columns, **kwargs)
 
     def parse_html(self, html):
@@ -33,7 +32,11 @@ class StagingEtlTutby(StagingHtmlEtl):
         label = label[0].get_text()
         header = header[0].get_text()
         n_comments = n_comments[0].get_text() if n_comments else None
+
         time = time[0]['datetime']
+        time = pd.to_datetime(time)
+        time = time.strftime('%Y-%m-%d %H:%M')
+
         document = document[0].get_text()
 
         tags = tags[0].findChildren('a', recursive=False) if tags else []

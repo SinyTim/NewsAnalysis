@@ -1,19 +1,17 @@
 import uuid
+from pathlib import Path
+
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from pathlib import Path
 
 from utils.auditable_etl import AuditableEtl
 
 
 class Scraper(AuditableEtl):
 
-    def __init__(self, process_name: str, path_destination: Path):
-        super().__init__()
-
-        self.process_name = process_name
-        self.path_destination = path_destination
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs, destination_extension='csv')
 
     def extract(self, source):
 
@@ -28,20 +26,21 @@ class Scraper(AuditableEtl):
 
         return data
 
-    def transform(self, data):
+    def transform(self, data: pd.DataFrame):
         data['html'] = data['html'].map(self.get_body)
         return data
 
-    def load(self, data, destination):
+    def load(self, data: pd.DataFrame, destination: str):
 
         data = data.groupby('source')
 
         for source, pages in data:
             path = destination.format(source)
+            Path(path).parent.mkdir(exist_ok=True)
             pages = pages[['url_id', 'html']]
             pages.to_csv(path, index=False)
 
-    def start_audit(self, source, destination):
+    def start_audit(self, source, destination: str):
 
         query = []
         for url_id, url, source_cite in source:
@@ -71,9 +70,9 @@ class Scraper(AuditableEtl):
         return self.cursor.fetchall()
 
     def get_destination(self):
-        return f'{self.path_destination.as_posix()}/{{}}/{uuid.uuid1()}.csv'
+        return f'{self.path_destination.as_posix()}/{{}}/{uuid.uuid1()}.{self.destination_extension}'
 
-    def get_body(self, page):
+    def get_body(self, page: str):
         soup = BeautifulSoup(page, 'html.parser')
         body = str(soup.body)
         return body
