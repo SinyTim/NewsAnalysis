@@ -1,3 +1,4 @@
+import logging
 import uuid
 from pathlib import Path
 
@@ -21,6 +22,8 @@ class Scraper(AuditableEtl):
             response = requests.get(url)
             page = response.text
             data += [(url_id, source_cite, page)]
+
+            logging.info(f'{self.process_name} {url}')
 
         data = pd.DataFrame(data, columns=['url_id', 'source', 'html'])
 

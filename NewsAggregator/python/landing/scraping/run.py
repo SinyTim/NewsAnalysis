@@ -1,9 +1,11 @@
+import logging
 from pathlib import Path
 
 from landing.scraping.scraper import Scraper
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
 
     params = {
         'process_name': 'scraper',

@@ -1,4 +1,5 @@
 import datetime
+import logging
 import urllib.parse
 
 import pandas as pd
@@ -62,6 +63,8 @@ class UrlGeneratorWithDateState(UrlGenerator):
                 urls_bad += [(url, response.url, response.status_code)]
 
             state = self.increment_state(state)
+
+            logging.info(f'{self.process_name} {url}')
 
         urls = pd.Series(urls)
         urls_bad = pd.DataFrame(urls_bad, columns=['url', 'url_response', 'status_code'])

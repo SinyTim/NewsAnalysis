@@ -1,8 +1,11 @@
+import logging
+
 from landing.scraping.url_generation.generator_date import UrlGeneratorWithDateState
 from landing.scraping.url_generation.generator_int import UrlGeneratorWithIntState
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
 
     params = [
         {

@@ -19,15 +19,19 @@ class StagingEtlNaviny(StagingHtmlEtl):
         header = header[0].get_text()
         header = header.strip()
 
-        info = soup.find_all('div', class_='pull-left')  # class_="article-info"
+        info = soup.find_all('div', class_='article-info')
+        if len(info) != 1:
+            return f'invalid tags number: article-info - {len(info)}'
+
+        info = info[0].find_all('div', class_='pull-left')
         if len(info) != 2:
-            return f'invalid tags number: info - {len(info)}'
+            return f'invalid tags number: pull-left - {len(info)}'
 
         time = info[0].time.get_text()
         time = pd.to_datetime(time, format='%d.%m.%Y / %H:%M')
         time = time.strftime('%Y-%m-%d %H:%M')
 
-        label = info[0].a.get_text()
+        label = info[0].a.get_text() if info[0].a else None
 
         n_views = info[1].span.get_text()
         n_views = int(n_views.split(' ')[-1])

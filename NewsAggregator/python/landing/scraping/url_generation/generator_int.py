@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 import requests
 
@@ -36,6 +38,8 @@ class UrlGeneratorWithIntState(UrlGenerator):
                 n_fails += 1
 
             page_index = self.increment_state(page_index)
+
+            logging.info(f'{self.process_name} {url}')
 
         urls = pd.DataFrame(urls, columns=['url', 'url_response'])
         urls_bad = pd.DataFrame(urls_bad, columns=['url', 'url_response', 'status_code'])
