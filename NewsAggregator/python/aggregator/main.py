@@ -1,3 +1,4 @@
+from aggregator.analytics.clustering.run import main as main_clustering
 from aggregator.analytics.embedding.postprocessing.run import main as main_umap
 from aggregator.analytics.embedding.run import main as main_embedding
 from aggregator.analytics.index.run import main as main_index
@@ -17,6 +18,7 @@ def main():
     main_embedding()
     main_index()
     main_umap()
+    main_clustering()
 
 
 if __name__ == '__main__':

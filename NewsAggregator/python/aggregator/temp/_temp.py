@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     pd.set_option('display.max_columns', 10)
 
-    path = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\preprocessed')
+    path = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\clustering')
     df = read_parquet(path)
 
-    print(df[df['url_id'] == 614]['document'].iloc[0])
+    print(df)
