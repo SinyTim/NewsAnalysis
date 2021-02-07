@@ -4,6 +4,7 @@ from aggregator.analytics.embedding.run import main as main_embedding
 from aggregator.analytics.index.run import main as main_index
 from aggregator.analytics.keywords.run import main as main_keywords
 from aggregator.analytics.text_preprocessing.run import main as main_preprocessing
+from aggregator.analytics.topicwords.run import main as main_topicwords
 from aggregator.curated.run import main as main_curated
 from aggregator.raw.scraping.run import main as main_scraping
 from aggregator.raw.scraping.url_generation.run import main as main_generation
@@ -21,6 +22,7 @@ def main():
     main_index()
     main_umap()
     main_clustering()
+    main_topicwords()
 
 
 if __name__ == '__main__':

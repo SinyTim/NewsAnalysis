@@ -31,7 +31,7 @@ def main():
 
     for label, distance in zip(labels, distances):
         record = data[data['url_id'] == label].iloc[0]
-        s = f"\[{record['time']}\] [{record['header']}]({record['url']}) (distance: {distance:.3f}, class: {record['topic_id']}) keywords: {record['document_keywords']}"
+        s = f"\[{record['time']}\] [{record['header']}]({record['url']}) (distance: {distance:.3f}, class: {record['topic_id']}) keywords: {record['document_keywords']}, topicwords: {record['topic_words']}"
         st.info(s)
 
 
@@ -42,6 +42,7 @@ def get_data():
     path_embeddings = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\embeddings')
     path_class = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\clustering')
     path_keywords = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\keywords')
+    path_topicwords = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\topicwords')
 
     index = faiss.read_index(str(path_index))
 
@@ -49,6 +50,7 @@ def get_data():
     embeddings = read_parquet(path_embeddings)
     classes = read_parquet(path_class)
     keywords = read_parquet(path_keywords)
+    topicwords = read_parquet(path_topicwords)
     urls = get_urls(articles['url_id'])
 
     articles = articles.set_index('url_id', drop=False)
@@ -60,6 +62,7 @@ def get_data():
     data = data.join(classes, how='inner')
     data = data.join(keywords, how='inner')
     data = data.join(urls, how='inner')
+    data = data.merge(topicwords, how='left', on='topic_id')
 
     data = data.sort_values('time', ascending=False)
 
