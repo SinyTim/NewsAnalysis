@@ -31,7 +31,7 @@ def main():
 
     for label, distance in zip(labels, distances):
         record = data[data['url_id'] == label].iloc[0]
-        s = f"\[{record['time']}\] [{record['header']}]({record['url']}) (distance: {distance:.3f}, class: {record['topic_id']})"
+        s = f"\[{record['time']}\] [{record['header']}]({record['url']}) (distance: {distance:.3f}, class: {record['topic_id']}) keywords: {record['document_keywords']}"
         st.info(s)
 
 
@@ -41,21 +41,24 @@ def get_data():
     path_articles = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\curated\articles')
     path_embeddings = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\embeddings')
     path_class = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\clustering')
+    path_keywords = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\keywords')
 
     index = faiss.read_index(str(path_index))
 
     articles = read_parquet(path_articles)
     embeddings = read_parquet(path_embeddings)
     classes = read_parquet(path_class)
+    keywords = read_parquet(path_keywords)
+    urls = get_urls(articles['url_id'])
 
     articles = articles.set_index('url_id', drop=False)
     embeddings = embeddings.set_index('url_id')
     classes = classes.set_index('url_id')
+    keywords = keywords.set_index('url_id')
 
-    urls = get_urls(articles['url_id'])
-
-    data = articles.join(embeddings, how='inner', rsuffix='_emb')
+    data = articles.join(embeddings, how='inner')
     data = data.join(classes, how='inner')
+    data = data.join(keywords, how='inner')
     data = data.join(urls, how='inner')
 
     data = data.sort_values('time', ascending=False)

@@ -15,7 +15,7 @@ def main():
     data = pd.read_csv(path_data)
     data = data['document'].fillna('')
 
-    vectorizer_idf = TfidfVectorizer(norm='l1', use_idf=True)
+    vectorizer_idf = TfidfVectorizer(norm='l1', use_idf=True, min_df=100, max_df=0.97)
     vectorizer_idf.fit(data)
 
     idf = vectorizer_idf.idf_
