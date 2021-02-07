@@ -13,7 +13,7 @@ class IndexEtl(AuditableEtl):
         super().__init__(**kwargs)
 
         self.name_index = 'index.faiss'
-        self.name_column_document = 'document'
+        self.name_column_document = 'embedding_document'
         self.name_column_label = 'url_id'
 
     def extract(self, path_embeddings):

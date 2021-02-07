@@ -25,8 +25,8 @@ class Word2vecEtl(AuditableEtl):
 
     def transform(self, data):
         processed = data[['url_id']]
-        processed['header'] = data['header'].map(self.infer_document)
-        processed['document'] = data['document'].map(self.infer_document)
+        processed['embedding_header'] = data['header'].map(self.infer_document)
+        processed['embedding_document'] = data['document'].map(self.infer_document)
         return processed
 
     def load(self, data, destination):

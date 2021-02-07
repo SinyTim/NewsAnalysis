@@ -19,13 +19,13 @@ class UmapEtl(AuditableEtl):
 
     def transform(self, data):
 
-        embeddings = data['document'].to_list()
+        embeddings = data['embedding_document'].to_list()
         embeddings = np.array(embeddings, dtype=np.float32)
 
         embeddings = self.model_umap.transform(embeddings)
 
         processed = data[['url_id']]
-        processed['document'] = embeddings.tolist()
+        processed['embedding_document'] = embeddings.tolist()
 
         return processed
 

@@ -17,7 +17,7 @@ class ClusteringEtl(AuditableEtl):
 
     def transform(self, data):
 
-        embeddings = data['document'].to_list()
+        embeddings = data['embedding_document'].to_list()
         embeddings = np.array(embeddings, dtype=np.float32)
 
         cluster = hdbscan.HDBSCAN(
@@ -29,7 +29,7 @@ class ClusteringEtl(AuditableEtl):
         cluster.fit(embeddings)
 
         processed = data[['url_id']]
-        processed['label'] = cluster.labels_
+        processed['topic_id'] = cluster.labels_
 
         return processed
 

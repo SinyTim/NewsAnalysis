@@ -31,7 +31,7 @@ def main():
 
     for label, distance in zip(labels, distances):
         record = data[data['url_id'] == label].iloc[0]
-        s = f"\[{record['time']}\] [{record['header']}]({record['url']}) (distance: {distance:.3f}, class: {record['label']})"
+        s = f"\[{record['time']}\] [{record['header']}]({record['url']}) (distance: {distance:.3f}, class: {record['topic_id']})"
         st.info(s)
 
 
