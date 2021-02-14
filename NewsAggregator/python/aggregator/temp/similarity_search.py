@@ -8,7 +8,7 @@ from aggregator.utils import read_dir_parquet
 
 if __name__ == '__main__':
 
-    path_index = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\index\index.faiss')
+    path_index = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\model\index\index.faiss')
     path_embeddings = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\embeddings')
 
     index = faiss.read_index(str(path_index))

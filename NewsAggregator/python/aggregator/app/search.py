@@ -37,7 +37,7 @@ def main():
 
 @st.cache(allow_output_mutation=True)
 def get_data():
-    path_index = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\index\index.faiss')
+    path_index = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\models\index\index.faiss')
     path_articles = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\curated\articles')
     path_embeddings = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\embeddings')
     path_class = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\clustering')

@@ -8,7 +8,7 @@ def main():
     params = {
         'process_name': 'index',
         'path_source': Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\embeddings'),
-        'path_destination': Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\index'),
+        'path_destination': Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\models\index'),
     }
 
     etl = IndexEtl(**params)
