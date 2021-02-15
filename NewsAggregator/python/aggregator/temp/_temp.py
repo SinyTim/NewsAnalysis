@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from aggregator.utils.function import read_parquet
+from aggregator.data_platform.utils.function import read_parquet
 
 
 if __name__ == '__main__':

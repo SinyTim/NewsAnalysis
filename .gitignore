@@ -8,3 +8,5 @@ wandb/
 *.session
 
 .idea/
+
+dagster_home/

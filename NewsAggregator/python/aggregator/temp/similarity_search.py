@@ -3,7 +3,7 @@ from pathlib import Path
 import faiss
 import numpy as np
 
-from aggregator.utils import read_dir_parquet
+from aggregator.data_platform.utils import read_dir_parquet
 
 
 if __name__ == '__main__':

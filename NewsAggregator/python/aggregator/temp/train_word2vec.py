@@ -4,7 +4,7 @@ from pathlib import Path
 import multiprocessing
 import logging
 
-from aggregator.utils import read_dir_parquet
+from aggregator.data_platform.utils import read_dir_parquet
 
 
 def main():

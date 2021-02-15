@@ -4,8 +4,6 @@ from pathlib import Path
 import numpy as np
 import umap
 
-from aggregator.utils.function import read_parquet
-
 
 def main():
 
