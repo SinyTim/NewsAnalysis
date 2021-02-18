@@ -18,10 +18,10 @@ class Scraper(AuditableEtl):
 
         data = []
 
-        for url_id, url, source_cite in source:
+        for url_id, url, source_site in source:
             response = requests.get(url)
             page = response.text
-            data += [(url_id, source_cite, page)]
+            data += [(url_id, source_site, page)]
 
             logging.info(f'{self.process_name} {url}')
 
@@ -46,8 +46,8 @@ class Scraper(AuditableEtl):
     def start_audit(self, source, destination: str):
 
         query = []
-        for url_id, url, source_cite in source:
-            path_destination = destination.format(source_cite)
+        for url_id, url, source_site in source:
+            path_destination = destination.format(source_site)
             query += [f"('{url_id}','{path_destination}','{self.process_name}')"]
 
         query = ','.join(query)
