@@ -9,4 +9,5 @@ wandb/
 
 .idea/
 
-dagster_home/
+**/dagster_home/*
+!**/dagster_home/*.yaml
