@@ -1,48 +1,44 @@
-import psycopg2
 import pandas as pd
+from pyspark.sql.functions import current_timestamp
+
+from aggregator.data_platform.utils import function
 
 
 class UrlGenerator:
 
-    def __init__(self, source: str, process_name: str, url_template: str, default_start_state: str):
+    def __init__(self, spark, database,
+                 source: str, url_template: str, default_start_state: str,
+                 path_target, path_bad_data):
 
-        auditdb_url = '34.123.127.77'
-        auditdb_name = 'dbaudit'
-        user_name = 'postgres'
-        user_password = 'P@ssw0rd'
+        self.spark = spark
+        self.database = database
 
         self.source = source
-        self.process_name = process_name
         self.url_template = url_template
         self.default_start_state = default_start_state
 
-        self.connection = psycopg2.connect(
-            host=auditdb_url, database=auditdb_name,
-            user=user_name, password=user_password,
-        )
-        self.connection.autocommit = True
-        self.cursor = self.connection.cursor()
-
-    def __del__(self):
-        if self.connection:
-            self.cursor.close()
-            self.connection.close()
+        self.path_target = path_target
+        self.path_bad_data = path_bad_data
 
     def run(self):
 
         start_state = self.get_last_state()
-
         generation_id = self.start_audit(start_state)
 
-        urls, urls_bad, stop_state = self.generate(start_state)
+        df_urls, df_urls_bad, stop_state = self.generate(start_state)
 
-        if len(urls) != 0:
-            self.write_urls(urls, generation_id)
+        df_urls = function.add_id_column(df_urls)
 
-        if len(urls_bad) != 0:
-            self.write_bad_urls(urls_bad, generation_id)
+        df_urls['generation_id'] = generation_id
+        df_urls_bad['generation_id'] = generation_id
 
-        self.stop_audit(generation_id, stop_state, len(urls))
+        if not df_urls.empty:
+            self.load(df_urls)
+
+        if not df_urls_bad.empty:
+            self.load_bad(df_urls_bad)
+
+        self.stop_audit(generation_id, stop_state)
 
     def generate(self, start_state):
         raise NotImplementedError
@@ -59,36 +55,39 @@ class UrlGenerator:
     def increment_state(self, state):
         raise NotImplementedError
 
+    def load(self, df_urls: pd.DataFrame):
+        self.spark \
+            .createDataFrame(df_urls) \
+            .withColumn('_time_updated', current_timestamp()) \
+            .coalesce(1) \
+            .write \
+            .format('delta') \
+            .mode('append') \
+            .save(str(self.path_target))  # todo merge by url
+
+    def load_bad(self, df_urls_bad: pd.DataFrame):
+        self.spark \
+            .createDataFrame(df_urls_bad) \
+            .coalesce(1) \
+            .write \
+            .format('delta') \
+            .mode('append') \
+            .save(str(self.path_bad_data))
+
     def get_last_state(self):
         query = f"select get_generation_last_state('{self.source}');"
-        self.cursor.execute(query)
-        state = self.cursor.fetchone()[0] or self.default_start_state
+        state = self.database.execute_fetchone(query)[0]
+        state = state or self.default_start_state
         state = self.state_from_str(state)
         return state
 
     def start_audit(self, start_state):
         start_state = self.state_to_str(start_state)
-        query = f"select start_url_generation('{self.source}', '{start_state}', '{self.process_name}');"
-        self.cursor.execute(query)
-        generation_id = self.cursor.fetchone()[0]
+        query = f"select start_url_generation('{self.source}', '{start_state}');"
+        generation_id = self.database.execute_fetchone(query)[0]
         return generation_id
 
-    def stop_audit(self, generation_id: int, stop_state, n_urls: int):
+    def stop_audit(self, generation_id: int, stop_state):
         stop_state = self.state_to_str(stop_state)
-        query = f"select stop_url_generation({generation_id}, '{stop_state}', {n_urls});"
-        self.cursor.execute(query)
-
-    def write_urls(self, urls: pd.Series, generation_id: int):
-        values = urls.map(lambda url: f"('{url}',{generation_id})")
-        values = ','.join(values)
-        query = f'insert into urls (url, url_generation_id) values {values} on conflict (url) do nothing;'
-        self.cursor.execute(query)
-
-    def write_bad_urls(self, bad_urls: pd.DataFrame, generation_id: int):
-        values = bad_urls.apply(
-            lambda row: f"('{row['url']}',{generation_id},{row['status_code']},'{row['url_response']}')",
-            axis=1
-        )
-        values = ','.join(values)
-        query = f'insert into urls_bad (url, url_generation_id, status_code, url_response) values {values};'
-        self.cursor.execute(query)
+        query = f"select stop_url_generation({generation_id}, '{stop_state}');"
+        self.database.execute(query)

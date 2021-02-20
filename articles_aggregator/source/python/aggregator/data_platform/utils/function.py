@@ -1,3 +1,4 @@
+import uuid
 from pathlib import Path
 
 import pandas as pd
@@ -13,3 +14,9 @@ def read_parquet(path_dir: Path = None, paths=None):
     data = pd.concat(data, ignore_index=True, sort=True)
 
     return data
+
+
+def add_id_column(df):
+    id_prefix = uuid.uuid1()
+    df['id'] = [f'{id_prefix}-{index}' for index in range(len(df))]
+    return df

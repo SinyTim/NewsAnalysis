@@ -18,10 +18,8 @@ create table url_generation(
    source       varchar(256) not null,
    start_state  varchar(256) not null,
    stop_state   varchar(256) null,
-   process_name varchar(256) not null,
    start_time   timestamptz  default now(),
-   stop_time    timestamptz  null,
-   n_urls       int          null
+   stop_time    timestamptz  null
 );
 
 

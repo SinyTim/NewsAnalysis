@@ -1,4 +1,7 @@
 pyspark
 dagster
-dagit
 dagster-pyspark
+dagit
+requests
+beautifulsoup4
+psycopg2

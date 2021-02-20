@@ -64,9 +64,9 @@ class UrlGeneratorWithDateState(UrlGenerator):
 
             state = self.increment_state(state)
 
-            logging.info(f'{self.process_name} {url}')
+            logging.info(f'{self.source} {url}')
 
-        urls = pd.Series(urls)
+        urls = pd.DataFrame(urls, columns=['url'])
         urls_bad = pd.DataFrame(urls_bad, columns=['url', 'url_response', 'status_code'])
         stop_state = state
 

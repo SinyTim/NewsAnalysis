@@ -2,63 +2,51 @@ import dagster
 import dagster_pyspark
 from dagster.core.definitions.no_step_launcher import no_step_launcher
 
+from aggregator.data_platform.orchestrator import resources
+from aggregator.data_platform.orchestrator import solids
+
 
 mode_local = dagster.ModeDefinition(
     name='local',
     resource_defs={
+        'database': resources.postgres_database,
+        'datalake': resources.datalake,
         'pyspark_step_launcher': no_step_launcher,
-        'pyspark': dagster_pyspark.pyspark_resource
+        'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
+            'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
+            'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
+            'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
+            'spark.default.parallelism': 2,
+        }}),
     }
 )
 
 
-@dagster.solid
-def get_name(context, default: str) -> str:
-    return default or 'dagster'
+preset_local = dagster.PresetDefinition.from_files(
+    name='local',
+    config_files=[
+        dagster.file_relative_path(__file__, '../../../../../configs/config_db.yaml'),
+        dagster.file_relative_path(__file__, '../../../../../configs/config_lake.yaml'),
+    ],
+    mode='local',
+)
 
 
-@dagster.solid(required_resource_keys={'pyspark', 'pyspark_step_launcher'})
-def hello(context, name: str) -> None:
-    spark = context.resources.pyspark.spark_session
-    context.log.info(f'Hello, {name}!')
-    x = range(1000)
-    x = spark.sparkContext.parallelize(x)
-    context.log.info(str(x.take(5)))
-    return x
-
-
-@dagster.pipeline(mode_defs=[mode_local])
-def hello_pipeline():
-    name = get_name()
-    hello(name)
+@dagster.pipeline(mode_defs=[mode_local], preset_defs=[preset_local])
+def pipeline_main():
+    solids.solid_generator_tutby()
+    # solid_generator_naviny()
 
 
 @dagster.schedule(
-    cron_schedule='*/1 * * * *',
-    pipeline_name='hello_pipeline',
+    cron_schedule='*/3 * * * *',
+    pipeline_name='pipeline_main',
+    mode='local',
 )
-def hello_schedule(date):
-    return {
-        'solids': {
-            'get_name': {'inputs': {'default': {'value': str(date)}}}
-        }
-    }
+def schedule_main(context):
+    return preset_local.run_config
 
 
 @dagster.repository
-def hello_repository():
-    return [hello_pipeline, hello_schedule]
-
-
-if __name__ == "__main__":
-
-    run_config = {
-        'solids': {
-            'get_name': {'inputs': {'default': {'value': 'World'}}}
-        }
-    }
-
-    dagster.execute_pipeline(hello_pipeline, run_config=run_config)
-
-# dagster-daemon run
-# dagit -f dag.py
+def repository_main():
+    return [pipeline_main, schedule_main]

@@ -70,12 +70,13 @@ class Scraper(AuditableEtl):
     def get_unprocessed_source(self):
         query = f"select * from get_unprocessed_urls('{self.process_name}');"
         self.cursor.execute(query)
-        return self.cursor.fetchall()  # todo limit 5000
+        return self.cursor.fetchall()
 
     def get_destination(self):
         return f'{self.path_destination.as_posix()}/{{}}/{uuid.uuid1()}.{self.destination_extension}'
 
-    def get_body(self, page: str):
+    @staticmethod
+    def get_body(page: str):
         soup = BeautifulSoup(page, 'html.parser')
         body = str(soup.body)
         return body

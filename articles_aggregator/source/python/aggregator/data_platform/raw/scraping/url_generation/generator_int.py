@@ -30,7 +30,7 @@ class UrlGeneratorWithIntState(UrlGenerator):
             response = requests.get(url)
 
             if (response.status_code == 200) and (response.url != self.bad_response_url):
-                urls += [(url, response.url)]
+                urls += [response.url]
                 n_fails = 0
                 last_success_page_index = page_index
             else:
@@ -39,14 +39,14 @@ class UrlGeneratorWithIntState(UrlGenerator):
 
             page_index = self.increment_state(page_index)
 
-            logging.info(f'{self.process_name} {url}')
+            logging.info(f'{self.source} {url}')
 
-        urls = pd.DataFrame(urls, columns=['url', 'url_response'])
+        urls = pd.DataFrame(urls, columns=['url'])
         urls_bad = pd.DataFrame(urls_bad, columns=['url', 'url_response', 'status_code'])
 
         stop_state = self.increment_state(last_success_page_index) if last_success_page_index else start_state
 
-        return urls['url_response'], urls_bad, stop_state
+        return urls, urls_bad, stop_state
 
     def state_from_str(self, state: str):
         return int(state)
