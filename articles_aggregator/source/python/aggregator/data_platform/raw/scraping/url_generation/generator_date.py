@@ -14,6 +14,8 @@ class UrlGeneratorWithDateState(UrlGenerator):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        logging.basicConfig(level=logging.INFO)
+
         self.last_page_html_tag = 'li'
         self.last_page_html_class = 'pager-last'
         self.link_html_tag = 'h3'
@@ -38,11 +40,16 @@ class UrlGeneratorWithDateState(UrlGenerator):
                 page = response.text
                 soup = BeautifulSoup(page, 'html.parser')
 
-                link_last_page = soup.find_all(self.last_page_html_tag, class_=self.last_page_html_class)[0]
-                url_last_page = link_last_page.findChildren('a', recursive=False)[0]['href']
-                url_last_page = urllib.parse.urlparse(url_last_page)
-                index_last_page = urllib.parse.parse_qs(url_last_page.query)[self.url_param_page]
-                index_last_page = int(index_last_page[0])
+                link_last_page = soup.find_all(self.last_page_html_tag, class_=self.last_page_html_class)
+
+                if link_last_page:
+                    link_last_page = link_last_page[0]
+                    url_last_page = link_last_page.findChildren('a', recursive=False)[0]['href']
+                    url_last_page = urllib.parse.urlparse(url_last_page)
+                    index_last_page = urllib.parse.parse_qs(url_last_page.query)[self.url_param_page]
+                    index_last_page = int(index_last_page[0])
+                else:
+                    index_last_page = 0
 
                 for index_page in range(index_last_page + 1):
 
@@ -64,7 +71,7 @@ class UrlGeneratorWithDateState(UrlGenerator):
 
             state = self.increment_state(state)
 
-            logging.info(f'{self.source} {url}')
+            logging.info(f'{self.process_name} {url}')
 
         urls = pd.DataFrame(urls, columns=['url'])
         urls_bad = pd.DataFrame(urls_bad, columns=['url', 'url_response', 'status_code'])

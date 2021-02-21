@@ -11,6 +11,8 @@ class UrlGeneratorWithIntState(UrlGenerator):
     def __init__(self, max_n_fails: int, **kwargs):
         super().__init__(**kwargs)
 
+        logging.basicConfig(level=logging.INFO)
+
         self.max_n_fails = max_n_fails
         self.bad_response_url = 'https://news.tut.by/'
 
@@ -39,7 +41,7 @@ class UrlGeneratorWithIntState(UrlGenerator):
 
             page_index = self.increment_state(page_index)
 
-            logging.info(f'{self.source} {url}')
+            logging.info(f'{self.process_name} {url}')
 
         urls = pd.DataFrame(urls, columns=['url'])
         urls_bad = pd.DataFrame(urls_bad, columns=['url', 'url_response', 'status_code'])

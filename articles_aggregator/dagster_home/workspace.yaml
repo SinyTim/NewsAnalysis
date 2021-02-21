@@ -4,5 +4,5 @@
 
 load_from:
   - python_file:
-      relative_path: ../source/python/aggregator/data_platform/orchestrator/dag.py
+      relative_path: ../source/python/aggregator/data_platform/orchestrator/repository.py
       working_directory: ../source/python

@@ -27,6 +27,7 @@ preset_local = dagster.PresetDefinition.from_files(
     config_files=[
         dagster.file_relative_path(__file__, '../../../../../configs/config_db.yaml'),
         dagster.file_relative_path(__file__, '../../../../../configs/config_lake.yaml'),
+        dagster.file_relative_path(__file__, '../../../../../configs/config_pipe.yaml'),
     ],
     mode='local',
 )
@@ -34,12 +35,20 @@ preset_local = dagster.PresetDefinition.from_files(
 
 @dagster.pipeline(mode_defs=[mode_local], preset_defs=[preset_local])
 def pipeline_main():
-    solids.solid_generator_tutby()
-    # solid_generator_naviny()
+
+    path_url_naviny = solids.solid_generator_naviny()
+    path_url_tutby = solids.solid_generator_tutby()
+    path_url_komzdrav = solids.solid_generator_komzdrav()
+    path_url_4gkb = solids.solid_generator_4gkb()
+
+    path_html_naviny = solids.solid_scraper_naviny(path_source=path_url_naviny)
+    path_html_tutby = solids.solid_scraper_tutby(path_source=path_url_tutby)
+    path_html_komzdrav = solids.solid_scraper_komzdrav(path_source=path_url_komzdrav)
+    path_html_4gkb = solids.solid_scraper_4gkb(path_source=path_url_4gkb)
 
 
 @dagster.schedule(
-    cron_schedule='*/3 * * * *',
+    cron_schedule='*/5 * * * *',
     pipeline_name='pipeline_main',
     mode='local',
 )

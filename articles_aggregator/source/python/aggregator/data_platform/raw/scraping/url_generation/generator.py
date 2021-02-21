@@ -7,13 +7,15 @@ from aggregator.data_platform.utils import function
 class UrlGenerator:
 
     def __init__(self, spark, database,
-                 source: str, url_template: str, default_start_state: str,
+                 process_name: str,
+                 url_template: str, default_start_state: str,
                  path_target, path_bad_data):
 
         self.spark = spark
         self.database = database
 
-        self.source = source
+        self.process_name = process_name
+
         self.url_template = url_template
         self.default_start_state = default_start_state
 
@@ -23,14 +25,11 @@ class UrlGenerator:
     def run(self):
 
         start_state = self.get_last_state()
-        generation_id = self.start_audit(start_state)
+        audit_id = self.start_audit(start_state)
 
         df_urls, df_urls_bad, stop_state = self.generate(start_state)
 
         df_urls = function.add_id_column(df_urls)
-
-        df_urls['generation_id'] = generation_id
-        df_urls_bad['generation_id'] = generation_id
 
         if not df_urls.empty:
             self.load(df_urls)
@@ -38,7 +37,7 @@ class UrlGenerator:
         if not df_urls_bad.empty:
             self.load_bad(df_urls_bad)
 
-        self.stop_audit(generation_id, stop_state)
+        self.stop_audit(audit_id, stop_state)
 
     def generate(self, start_state):
         raise NotImplementedError
@@ -75,7 +74,7 @@ class UrlGenerator:
             .save(str(self.path_bad_data))
 
     def get_last_state(self):
-        query = f"select get_generation_last_state('{self.source}');"
+        query = f"select get_audit_last_state('{self.process_name}');"
         state = self.database.execute_fetchone(query)[0]
         state = state or self.default_start_state
         state = self.state_from_str(state)
@@ -83,11 +82,11 @@ class UrlGenerator:
 
     def start_audit(self, start_state):
         start_state = self.state_to_str(start_state)
-        query = f"select start_url_generation('{self.source}', '{start_state}');"
-        generation_id = self.database.execute_fetchone(query)[0]
-        return generation_id
+        query = f"select start_audit('{self.process_name}', '{start_state}');"
+        audit_id = self.database.execute_fetchone(query)[0]
+        return audit_id
 
-    def stop_audit(self, generation_id: int, stop_state):
+    def stop_audit(self, audit_id: int, stop_state):
         stop_state = self.state_to_str(stop_state)
-        query = f"select stop_url_generation({generation_id}, '{stop_state}');"
+        query = f"select stop_audit({audit_id}, '{stop_state}');"
         self.database.execute(query)

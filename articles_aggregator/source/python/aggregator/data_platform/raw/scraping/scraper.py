@@ -1,82 +1,105 @@
-import logging
-import uuid
-from pathlib import Path
-
-import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from pyspark.sql.functions import col
+from pyspark.sql.functions import current_timestamp
+from pyspark.sql.functions import lit
+from pyspark.sql.functions import udf
 
-from aggregator.data_platform.utils.auditable_etl import AuditableEtl
 
+class Scraper:
+    def __init__(self, spark, database, process_name: str, path_source, path_target):
 
-class Scraper(AuditableEtl):
+        self.spark = spark
+        self.database = database
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs, destination_extension='csv')
+        self.process_name = process_name
 
-    def extract(self, source):
+        self.path_source = path_source
+        self.path_target = path_target
 
-        data = []
+        self.default_start_state = '1677-09-21 00:12:43.145225'
 
-        for url_id, url, source_site in source:
-            response = requests.get(url)
-            page = response.text
-            data += [(url_id, source_site, page)]
+    def run(self):
 
-            logging.info(f'{self.process_name} {url}')
+        start_state = self.get_last_state()
+        audit_id = self.start_audit(start_state)
 
-        data = pd.DataFrame(data, columns=['url_id', 'source', 'html'])
+        df, stop_state = self.extract(start_state)
+        df = self.transform(df)
+        self.load(df)
 
-        return data
+        self.stop_audit(audit_id, stop_state)
 
-    def transform(self, data: pd.DataFrame):
-        data['html'] = data['html'].map(self.get_body)
-        return data
+    def extract(self, time_updated_start):
 
-    def load(self, data: pd.DataFrame, destination: str):
+        df_urls = self.spark.read \
+            .format('delta') \
+            .load(str(self.path_source)) \
+            .filter(col('_time_updated') > lit(time_updated_start))
 
-        data = data.groupby('source')
+        time_updated_stop = df_urls \
+            .agg({'_time_updated': 'max'}) \
+            .collect()[0][0]
+        time_updated_stop = time_updated_stop or time_updated_start
 
-        for source, pages in data:
-            path = destination.format(source)
-            Path(path).parent.mkdir(exist_ok=True)
-            pages = pages[['url_id', 'html']]
-            pages.to_csv(path, index=False)
+        return df_urls, time_updated_stop
 
-    def start_audit(self, source, destination: str):
+    def transform(self, df_urls):
 
-        query = []
-        for url_id, url, source_site in source:
-            path_destination = destination.format(source_site)
-            query += [f"('{url_id}','{path_destination}','{self.process_name}')"]
+        get_html = udf(self.get_html)
+        get_body = udf(self.get_body)
 
-        query = ','.join(query)
-        query = f"insert into url_audit (url_id, destination, process_name) values {query} returning id;"
+        # todo set number of executors instead of repartition
+        df_html = df_urls \
+            .repartition(2) \
+            .withColumn('html', get_html('url')) \
+            .withColumn('html', get_body('html')) \
+            .select(col('id').alias('url_id'), 'html')
 
-        self.cursor.execute(query)
-        audit_ids = self.cursor.fetchall()
+        return df_html
 
-        return audit_ids
+    def load(self, df_html):
+        df_html \
+            .withColumn('_time_updated', current_timestamp()) \
+            .coalesce(1) \
+            .write \
+            .format('delta') \
+            .mode('append') \
+            .save(str(self.path_target))
 
-    def stop_audit(self, audit_ids):
-
-        audit_ids = [str(_[0]) for _ in audit_ids]
-        audit_ids = ','.join(audit_ids)
-        audit_ids = f'({audit_ids})'
-
-        query = f'update url_audit set stop_time = now() where id in {audit_ids};'
-        self.cursor.execute(query)
-
-    def get_unprocessed_source(self):
-        query = f"select * from get_unprocessed_urls('{self.process_name}');"
-        self.cursor.execute(query)
-        return self.cursor.fetchall()
-
-    def get_destination(self):
-        return f'{self.path_destination.as_posix()}/{{}}/{uuid.uuid1()}.{self.destination_extension}'
+    @staticmethod
+    def get_html(url: str):
+        response = requests.get(url)
+        html = response.text
+        return html
 
     @staticmethod
     def get_body(page: str):
         soup = BeautifulSoup(page, 'html.parser')
         body = str(soup.body)
         return body
+
+    def get_last_state(self):
+        query = f"select get_audit_last_state('{self.process_name}');"
+        state = self.database.execute_fetchone(query)[0]
+        state = state or self.default_start_state
+        state = self.state_from_str(state)
+        return state
+
+    def start_audit(self, start_state):
+        start_state = self.state_to_str(start_state)
+        query = f"select start_audit('{self.process_name}', '{start_state}');"
+        audit_id = self.database.execute_fetchone(query)[0]
+        return audit_id
+
+    def stop_audit(self, audit_id: int, stop_state):
+        assert stop_state
+        stop_state = self.state_to_str(stop_state)
+        query = f"select stop_audit({audit_id}, '{stop_state}');"
+        self.database.execute(query)
+
+    def state_from_str(self, state):
+        return state
+
+    def state_to_str(self, state):
+        return state

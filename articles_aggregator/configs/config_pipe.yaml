@@ -1,0 +1,37 @@
+solids:
+
+  solid_generator_naviny:
+    inputs:
+      path_bad_data: 'bad/urls.delta'
+      path_target: 'raw/url/naviny.delta'
+
+  solid_generator_tutby:
+    inputs:
+      path_bad_data: 'bad/urls.delta'
+      path_target: 'raw/url/tutby.delta'
+
+  solid_generator_komzdrav:
+    inputs:
+      path_bad_data: 'bad/urls.delta'
+      path_target: 'raw/url/komzdrav.delta'
+
+  solid_generator_4gkb:
+    inputs:
+      path_bad_data: 'bad/urls.delta'
+      path_target: 'raw/url/4gkb.delta'
+
+  solid_scraper_4gkb:
+    inputs:
+      path_target: 'raw/html/4gkb.delta'
+
+  solid_scraper_komzdrav:
+    inputs:
+      path_target: 'raw/html/komzdrav.delta'
+
+  solid_scraper_naviny:
+    inputs:
+      path_target: 'raw/html/naviny.delta'
+
+  solid_scraper_tutby:
+    inputs:
+      path_target: 'raw/html/tutby.delta'
