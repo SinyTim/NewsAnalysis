@@ -45,3 +45,19 @@ solids:
   solid_scraper_tutby:
     inputs:
       path_target: 'raw/html/tutby.delta'
+
+  solid_structured_4gkb:
+    inputs:
+      path_target: 'structured/4gkb.delta'
+
+  solid_structured_komzdrav:
+    inputs:
+      path_target: 'structured/komzdrav.delta'
+
+  solid_structured_naviny:
+    inputs:
+      path_target: 'structured/naviny.delta'
+
+  solid_structured_tutby:
+    inputs:
+      path_target: 'structured/tutby.delta'

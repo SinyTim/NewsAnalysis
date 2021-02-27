@@ -5,3 +5,4 @@ dagit
 requests
 beautifulsoup4
 psycopg2
+pandas

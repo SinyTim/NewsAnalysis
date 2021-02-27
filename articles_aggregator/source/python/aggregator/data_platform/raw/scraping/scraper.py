@@ -26,13 +26,13 @@ class Scraper(IncrementalDeltaEtl):
         return df_html
 
     @staticmethod
-    def get_html(url: str):
+    def get_html(url: str) -> str:
         response = requests.get(url)
         html = response.text
         return html
 
     @staticmethod
-    def get_body(page: str):
+    def get_body(page: str) -> str:
         soup = BeautifulSoup(page, 'html.parser')
         body = str(soup.body)
         return body

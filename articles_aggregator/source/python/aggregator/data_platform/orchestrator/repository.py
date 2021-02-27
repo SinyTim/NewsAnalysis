@@ -16,7 +16,7 @@ mode_local = dagster.ModeDefinition(
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
-            'spark.default.parallelism': 2,
+            'spark.default.parallelism': 8,
         }}),
     }
 )
@@ -46,9 +46,19 @@ def pipeline_main():
     path_html_komzdrav = solids.solid_scraper_komzdrav(path_source=path_url_komzdrav)
     path_html_4gkb = solids.solid_scraper_4gkb(path_source=path_url_4gkb)
 
+    path_structured_4gkb = solids.solid_structured_4gkb(path_source=path_html_4gkb)
+    path_structured_komzdrav = solids.solid_structured_komzdrav(path_source=path_html_komzdrav)
+    path_structured_naviny = solids.solid_structured_naviny(path_source=path_html_naviny)
+    path_structured_tutby = solids.solid_structured_tutby(path_source=path_html_tutby)
+
+
+@dagster.pipeline(mode_defs=[mode_local], preset_defs=[preset_local])
+def pipeline_test():
+    path_structured_tutby = solids.solid_structured_tutby()
+
 
 @dagster.schedule(
-    cron_schedule='*/5 * * * *',
+    cron_schedule='*/10 * * * *',
     pipeline_name='pipeline_main',
     mode='local',
 )
@@ -58,4 +68,4 @@ def schedule_main(context):
 
 @dagster.repository
 def repository_main():
-    return [pipeline_main, schedule_main]
+    return [pipeline_test, pipeline_main, schedule_main]

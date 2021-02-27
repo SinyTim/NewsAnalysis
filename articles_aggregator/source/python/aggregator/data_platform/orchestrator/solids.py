@@ -3,6 +3,9 @@ import dagster
 from aggregator.data_platform.raw.scraping.scraper import Scraper
 from aggregator.data_platform.raw.scraping.url_generation.generator_date import UrlGeneratorWithDateState
 from aggregator.data_platform.raw.scraping.url_generation.generator_int import UrlGeneratorWithIntState
+from aggregator.data_platform.structured.medicine import StructuredEtlMedicine
+from aggregator.data_platform.structured.naviny import StructuredEtlNaviny
+from aggregator.data_platform.structured.tutby import StructuredEtlTutby
 
 
 @dagster.solid(
@@ -179,5 +182,77 @@ def solid_scraper_4gkb(context, path_source: str, path_target: str) -> str:
     }
 
     Scraper(**params).run()
+
+    return path_target
+
+
+@dagster.solid(required_resource_keys={'database', 'datalake', 'pyspark_step_launcher', 'pyspark'})
+def solid_structured_4gkb(context, path_source: str, path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'spark': context.resources.pyspark.spark_session,
+        'path_source': path_lake / path_source,
+        'path_target': path_lake / path_target,
+        'database': context.resources.database,
+        'process_name': 'structured_4gkb',
+    }
+
+    StructuredEtlMedicine(**params).run()
+
+    return path_target
+
+
+@dagster.solid(required_resource_keys={'database', 'datalake', 'pyspark_step_launcher', 'pyspark'})
+def solid_structured_komzdrav(context, path_source: str, path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'spark': context.resources.pyspark.spark_session,
+        'path_source': path_lake / path_source,
+        'path_target': path_lake / path_target,
+        'database': context.resources.database,
+        'process_name': 'structured_komzdrav',
+    }
+
+    StructuredEtlMedicine(**params).run()
+
+    return path_target
+
+
+@dagster.solid(required_resource_keys={'database', 'datalake', 'pyspark_step_launcher', 'pyspark'})
+def solid_structured_naviny(context, path_source: str, path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'spark': context.resources.pyspark.spark_session,
+        'path_source': path_lake / path_source,
+        'path_target': path_lake / path_target,
+        'database': context.resources.database,
+        'process_name': 'structured_naviny',
+    }
+
+    StructuredEtlNaviny(**params).run()
+
+    return path_target
+
+
+@dagster.solid(required_resource_keys={'database', 'datalake', 'pyspark_step_launcher', 'pyspark'})
+def solid_structured_tutby(context, path_source: str, path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'spark': context.resources.pyspark.spark_session,
+        'path_source': path_lake / path_source,
+        'path_target': path_lake / path_target,
+        'database': context.resources.database,
+        'process_name': 'structured_tutby',
+    }
+
+    StructuredEtlTutby(**params).run()
 
     return path_target

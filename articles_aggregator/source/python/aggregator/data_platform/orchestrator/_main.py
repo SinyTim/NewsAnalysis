@@ -9,6 +9,8 @@ from aggregator.data_platform.curated.run import main as main_curated
 from aggregator.data_platform.raw.scraping.run import main as main_scraping
 from aggregator.data_platform.raw.scraping.url_generation.run import main as main_generation
 from aggregator.data_platform.structured.run import main as main_structured
+from aggregator.data_platform.utils.postgres_connection import PostgresConnection
+from pyspark.sql import SparkSession
 
 
 def main():
@@ -23,6 +25,20 @@ def main():
     main_umap()
     main_clustering()
     main_topicwords()
+
+    spark = SparkSession.builder \
+        .config('spark.jars.packages', 'io.delta:delta-core_2.12:0.8.0') \
+        .config('spark.sql.extensions', 'io.delta.sql.DeltaSparkSessionExtension') \
+        .config('spark.sql.catalog.spark_catalog', 'org.apache.spark.sql.delta.catalog.DeltaCatalog') \
+        .getOrCreate()
+
+    db = PostgresConnection(
+        host='34.123.127.77',
+        port=5432,
+        db_name='dbaudit',
+        user_name='postgres',
+        user_password='P@ssw0rd',
+    )
 
 
 if __name__ == '__main__':
