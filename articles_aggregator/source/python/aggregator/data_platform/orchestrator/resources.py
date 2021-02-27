@@ -15,7 +15,7 @@ from aggregator.data_platform.utils.postgres_connection import PostgresConnectio
     },
 )
 def postgres_database(context):
-    return PostgresConnection(context.resource_config)
+    return PostgresConnection(**context.resource_config)
 
 
 @dagster.resource(config_schema={'path': str})

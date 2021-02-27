@@ -56,10 +56,5 @@ class UrlGeneratorWithIntState(UrlGenerator):
     def state_to_str(self, state):
         return str(state)
 
-    def get_url_with_state(self, state):
-        state = self.state_to_str(state)
-        url = self.url_template.format(state)
-        return url
-
     def increment_state(self, state):
         return state + 1

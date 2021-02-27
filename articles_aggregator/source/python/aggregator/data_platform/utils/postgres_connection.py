@@ -3,13 +3,13 @@ import psycopg2
 
 class PostgresConnection:
 
-    def __init__(self, config):
+    def __init__(self, host, port, db_name, user_name, user_password):
 
-        self.host = config['host']
-        self.port = config['port']
-        self.db_name = config['db_name']
-        self.user_name = config['user_name']
-        self.user_password = config['user_password']
+        self.host = host
+        self.port = port
+        self.db_name = db_name
+        self.user_name = user_name
+        self.user_password = user_password
 
         self.connection = psycopg2.connect(
             host=self.host, port=self.port, database=self.db_name,

@@ -101,10 +101,5 @@ class UrlGeneratorWithDateState(UrlGenerator):
 
         return state
 
-    def get_url_with_state(self, state):
-        state = self.state_to_str(state)
-        url = self.url_template.format(state)
-        return url
-
     def increment_state(self, state):
         return state + datetime.timedelta(days=1)

@@ -4,6 +4,19 @@ from pathlib import Path
 import pandas as pd
 
 
+def read_delta(spark, path):
+    return spark.read \
+        .format('delta') \
+        .load(str(path))
+
+
+def write_delta(df, path, mode='append'):
+    df.write \
+        .format('delta') \
+        .mode(mode) \
+        .save(str(path))
+
+
 def read_parquet(path_dir: Path = None, paths=None):
     assert (path_dir is None) != (paths is None)
 

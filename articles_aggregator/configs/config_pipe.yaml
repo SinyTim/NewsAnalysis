@@ -1,3 +1,13 @@
+
+#execution:
+#  multiprocess:
+#    config:
+#      max_concurrent: 2
+#storage:
+#  filesystem:
+#    config:
+#      base_dir: ''
+
 solids:
 
   solid_generator_naviny:

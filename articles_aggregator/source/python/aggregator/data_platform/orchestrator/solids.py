@@ -17,16 +17,15 @@ def solid_generator_naviny(context, path_target: str, path_bad_data: str) -> str
 
     params = {
         'spark': context.resources.pyspark.spark_session,
-        'database': context.resources.database,
-        'process_name': 'generator_naviny',
         'url_template': 'https://naviny.media/day/{}',
-        'default_start_state': context.solid_config['default_start_state'],
         'path_target': path_lake / path_target,
         'path_bad_data': path_lake / path_bad_data,
+        'database': context.resources.database,
+        'process_name': 'generator_naviny',
+        'default_start_state': context.solid_config['default_start_state'],
     }
 
-    generator = UrlGeneratorWithDateState(**params)
-    generator.run()
+    UrlGeneratorWithDateState(**params).run()
 
     return path_target
 
@@ -43,18 +42,17 @@ def solid_generator_tutby(context, path_target: str, path_bad_data: str) -> str:
     path_lake = context.resources.datalake
 
     params = {
-        'spark': context.resources.pyspark.spark_session,
-        'database': context.resources.database,
-        'process_name': 'generator_tutby',
-        'url_template': 'https://news.tut.by/{}.html',
-        'default_start_state': context.solid_config['default_start_state'],
         'max_n_fails': context.solid_config['max_n_fails'],
+        'spark': context.resources.pyspark.spark_session,
+        'url_template': 'https://news.tut.by/{}.html',
         'path_target': path_lake / path_target,
         'path_bad_data': path_lake / path_bad_data,
+        'database': context.resources.database,
+        'process_name': 'generator_tutby',
+        'default_start_state': context.solid_config['default_start_state'],
     }
 
-    generator = UrlGeneratorWithIntState(**params)
-    generator.run()
+    UrlGeneratorWithIntState(**params).run()
 
     return path_target
 
@@ -81,8 +79,7 @@ def solid_generator_komzdrav(context, path_target: str, path_bad_data: str) -> s
         'path_bad_data': path_lake / path_bad_data,
     }
 
-    generator = UrlGeneratorWithIntState(**params)
-    generator.run()
+    UrlGeneratorWithIntState(**params).run()
 
     return path_target
 
@@ -109,8 +106,7 @@ def solid_generator_4gkb(context, path_target: str, path_bad_data: str) -> str:
         'path_bad_data': path_lake / path_bad_data,
     }
 
-    generator = UrlGeneratorWithIntState(**params)
-    generator.run()
+    UrlGeneratorWithIntState(**params).run()
 
     return path_target
 
@@ -122,14 +118,13 @@ def solid_scraper_tutby(context, path_source: str, path_target: str) -> str:
 
     params = {
         'spark': context.resources.pyspark.spark_session,
-        'database': context.resources.database,
-        'process_name': 'scraper_tutby',
         'path_source': path_lake / path_source,
         'path_target': path_lake / path_target,
+        'database': context.resources.database,
+        'process_name': 'scraper_tutby',
     }
 
-    generator = Scraper(**params)
-    generator.run()
+    Scraper(**params).run()
 
     return path_target
 
@@ -147,8 +142,7 @@ def solid_scraper_naviny(context, path_source: str, path_target: str) -> str:
         'path_target': path_lake / path_target,
     }
 
-    generator = Scraper(**params)
-    generator.run()
+    Scraper(**params).run()
 
     return path_target
 
@@ -166,8 +160,7 @@ def solid_scraper_komzdrav(context, path_source: str, path_target: str) -> str:
         'path_target': path_lake / path_target,
     }
 
-    generator = Scraper(**params)
-    generator.run()
+    Scraper(**params).run()
 
     return path_target
 
@@ -185,7 +178,6 @@ def solid_scraper_4gkb(context, path_source: str, path_target: str) -> str:
         'path_target': path_lake / path_target,
     }
 
-    generator = Scraper(**params)
-    generator.run()
+    Scraper(**params).run()
 
     return path_target
