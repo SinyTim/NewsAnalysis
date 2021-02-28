@@ -15,7 +15,7 @@ class UrlGenerator(IncrementalEtl):
         self.url_template = url_template
 
         self.path_target = path_target
-        self.path_bad_data = path_bad_data
+        # self.path_bad_data = path_bad_data
 
     def extract(self, start_state):
         df_urls, df_urls_bad, stop_state = self.generate(start_state)
@@ -34,8 +34,8 @@ class UrlGenerator(IncrementalEtl):
         if not df_urls.empty:
             self.load_good(df_urls)
 
-        if not df_urls_bad.empty:
-            self.load_bad(df_urls_bad)
+        # if not df_urls_bad.empty:
+        #     self.load_bad(df_urls_bad)
 
     def load_good(self, df_urls: pd.DataFrame):
         # todo merge by url
@@ -46,9 +46,9 @@ class UrlGenerator(IncrementalEtl):
 
         function.write_delta(df_urls, self.path_target)
 
-    def load_bad(self, df_urls_bad: pd.DataFrame):
-        df_urls = self.spark.createDataFrame(df_urls_bad)
-        function.write_delta(df_urls, self.path_bad_data)
+    # def load_bad(self, df_urls_bad: pd.DataFrame):
+    #     df_urls = self.spark.createDataFrame(df_urls_bad)
+    #     function.write_delta(df_urls, self.path_bad_data)
 
     def generate(self, start_state):
         raise NotImplementedError

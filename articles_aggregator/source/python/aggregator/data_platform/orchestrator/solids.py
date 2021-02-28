@@ -11,7 +11,7 @@ from aggregator.data_platform.structured.tutby import StructuredEtlTutby
 @dagster.solid(
     required_resource_keys={'database', 'datalake', 'pyspark_step_launcher', 'pyspark'},
     config_schema={
-        'default_start_state': dagster.Field(str, is_required=False, default_value='2021/02/18')
+        'default_start_state': dagster.Field(str, is_required=True)
     },
 )
 def solid_generator_naviny(context, path_target: str, path_bad_data: str) -> str:
@@ -36,8 +36,8 @@ def solid_generator_naviny(context, path_target: str, path_bad_data: str) -> str
 @dagster.solid(
     required_resource_keys={'database', 'datalake', 'pyspark_step_launcher', 'pyspark'},
     config_schema={
-        'default_start_state': dagster.Field(str, is_required=False, default_value='719738'),
-        'max_n_fails': dagster.Field(int, is_required=False, default_value=10),
+        'default_start_state': dagster.Field(str, is_required=True),
+        'max_n_fails': dagster.Field(int, is_required=True),
     },
 )
 def solid_generator_tutby(context, path_target: str, path_bad_data: str) -> str:
@@ -63,8 +63,8 @@ def solid_generator_tutby(context, path_target: str, path_bad_data: str) -> str:
 @dagster.solid(
     required_resource_keys={'database', 'datalake', 'pyspark_step_launcher', 'pyspark'},
     config_schema={
-        'default_start_state': dagster.Field(str, is_required=False, default_value='1'),
-        'max_n_fails': dagster.Field(int, is_required=False, default_value=5),
+        'default_start_state': dagster.Field(str, is_required=True),
+        'max_n_fails': dagster.Field(int, is_required=True),
     },
 )
 def solid_generator_komzdrav(context, path_target: str, path_bad_data: str) -> str:
@@ -90,8 +90,8 @@ def solid_generator_komzdrav(context, path_target: str, path_bad_data: str) -> s
 @dagster.solid(
     required_resource_keys={'database', 'datalake', 'pyspark_step_launcher', 'pyspark'},
     config_schema={
-        'default_start_state': dagster.Field(str, is_required=False, default_value='1'),
-        'max_n_fails': dagster.Field(int, is_required=False, default_value=35),
+        'default_start_state': dagster.Field(str, is_required=True),
+        'max_n_fails': dagster.Field(int, is_required=True),
     },
 )
 def solid_generator_4gkb(context, path_target: str, path_bad_data: str) -> str:

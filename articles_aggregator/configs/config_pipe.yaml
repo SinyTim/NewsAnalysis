@@ -10,25 +10,36 @@
 
 solids:
 
-  solid_generator_naviny:
+  solid_generator_4gkb:
     inputs:
       path_bad_data: 'bad/urls.delta'
-      path_target: 'raw/url/naviny.delta'
-
-  solid_generator_tutby:
-    inputs:
-      path_bad_data: 'bad/urls.delta'
-      path_target: 'raw/url/tutby.delta'
+      path_target: 'raw/url/4gkb.delta'
+    config:
+      default_start_state: '1'
+      max_n_fails: 35
 
   solid_generator_komzdrav:
     inputs:
       path_bad_data: 'bad/urls.delta'
       path_target: 'raw/url/komzdrav.delta'
+    config:
+      default_start_state: '1'
+      max_n_fails: 5
 
-  solid_generator_4gkb:
+  solid_generator_naviny:
     inputs:
       path_bad_data: 'bad/urls.delta'
-      path_target: 'raw/url/4gkb.delta'
+      path_target: 'raw/url/naviny.delta'
+    config:
+      default_start_state: '2021/02/20'
+
+  solid_generator_tutby:
+    inputs:
+      path_bad_data: 'bad/urls.delta'
+      path_target: 'raw/url/tutby.delta'
+    config:
+      default_start_state: '720500'
+      max_n_fails: 10
 
   solid_scraper_4gkb:
     inputs:

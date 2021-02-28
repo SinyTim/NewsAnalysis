@@ -28,6 +28,8 @@ class IncrementalDeltaEtl(IncrementalEtl, ABC):
 
         stop_state = stop_state or start_state
 
+        df = df.drop('_time_updated')
+
         return df, stop_state
 
     def load(self, df):
