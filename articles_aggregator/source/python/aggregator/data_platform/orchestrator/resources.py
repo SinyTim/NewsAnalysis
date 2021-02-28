@@ -20,4 +20,4 @@ def postgres_database(context):
 
 @dagster.resource(config_schema={'path': str})
 def datalake(context):
-    return Path(context.resource_config['path'])
+    return context.resource_config['path']

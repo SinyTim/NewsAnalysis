@@ -2,4 +2,5 @@
 resources:
   datalake:
     config:
-      path: 'file://C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data'
+#      path: 'file://C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\'
+      path: 'gs://bct-aggr/datalake/'

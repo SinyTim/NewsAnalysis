@@ -11,3 +11,5 @@ wandb/
 
 **/dagster_home/*
 !**/dagster_home/*.yaml
+
+gcs_keyfile.json

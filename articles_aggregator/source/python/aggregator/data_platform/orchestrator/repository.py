@@ -13,9 +13,15 @@ mode_local = dagster.ModeDefinition(
         'datalake': resources.datalake,
         'pyspark_step_launcher': no_step_launcher,
         'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
+            'spark.jars': r'C:\Users\Tim\Programs\spark\gcs-connector-hadoop3-latest.jar',
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
+            'spark.hadoop.fs.gs.impl': 'com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem',
+            'spark.hadoop.fs.AbstractFileSystem.gs.impl': 'com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS',
+            'spark.hadoop.google.cloud.auth.service.account.enable': 'true',
+            'spark.hadoop.google.cloud.auth.service.account.json.keyfile':
+                dagster.file_relative_path(__file__, '../../../../../configs/gcs_keyfile.json'),
             'spark.default.parallelism': 8,
             # 'spark.executor.instances': 1,
             # 'spark.executor.cores': 2,
