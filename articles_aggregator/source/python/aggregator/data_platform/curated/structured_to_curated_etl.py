@@ -1,49 +1,37 @@
-import pandas as pd
+from pyspark.sql.functions import col
+from pyspark.sql.functions import lit
+from pyspark.sql.functions import to_timestamp
 
-from aggregator.data_platform.utils.auditable_etl import AuditableEtl
+from aggregator.data_platform.utils.incremental_delta_etl import IncrementalDeltaEtl
 
 
-class StructuredToCuratedEtl(AuditableEtl):
+class StructuredToCuratedEtl(IncrementalDeltaEtl):
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs, destination_extension='parquet')
-        self.columns = ['url_id', 'header', 'time', 'document', 'tags']
+        super().__init__(**kwargs)
+        self.columns_target = [
+            ('url_id', 'string'),
+            ('header', 'string'),
+            ('document', 'string'),
+            ('time', 'string'),
+            ('tags', 'array<string>'),
+        ]
 
-    def extract(self, source):
-        data = [pd.read_csv(path_file) for path_file in source]
-        data = pd.concat(data, ignore_index=True)
-        return data
+    def transform(self, df):
 
-    def transform(self, data):
+        columns = [
+            name if name in df.columns else lit(None).cast(column_type).alias(name)
+            for name, column_type in self.columns_target
+        ]
 
-        existing_columns = set(data.columns)
-        load_columns = set(self.columns)
-        load_existing_columns = list(load_columns & existing_columns)
-        not_existing_columns = list(load_columns - existing_columns)
+        df = df \
+            .select(*columns) \
+            .withColumn('time', to_timestamp('time', format='yyyy-MM-dd HH:mm'))
 
-        load_existing_columns.sort()
-        not_existing_columns.sort()
+        # df_bad = df \
+        #     .filter(col('document').isNull() | (col('document') == '')) \
+        #     .select('url_id', lit('empty document').alias('error'))
 
-        data = data[load_existing_columns]
+        df = df.filter(col('document').isNotNull() & (col('document') != ''))
 
-        for column_name in not_existing_columns:
-            data = data.assign(**{column_name: None})
-
-        data['time'] = pd.to_datetime(data['time'], format='%Y-%m-%d %H:%M')
-
-        index_bad = data['document'].isna()
-
-        bad_data = data[['url_id']][index_bad]
-        bad_data['error'] = 'empty document'
-
-        data = data[~index_bad]
-
-        return data, bad_data
-
-    def load(self, data, destination):
-        data, bad_data = data
-
-        data.to_parquet(destination, index=False)
-
-        if len(bad_data) != 0:
-            self.write_bad_data(bad_data)
+        return df

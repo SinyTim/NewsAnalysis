@@ -1,5 +1,6 @@
 import dagster
 
+from aggregator.data_platform.curated.structured_to_curated_etl import StructuredToCuratedEtl
 from aggregator.data_platform.raw.scraping.scraper import Scraper
 from aggregator.data_platform.raw.scraping.url_generation.generator_date import UrlGeneratorWithDateState
 from aggregator.data_platform.raw.scraping.url_generation.generator_int import UrlGeneratorWithIntState
@@ -254,5 +255,28 @@ def solid_structured_tutby(context, path_source: str, path_target: str) -> str:
     }
 
     StructuredEtlTutby(**params).run()
+
+    return path_target
+
+
+@dagster.solid(
+    required_resource_keys={'database', 'datalake', 'pyspark_step_launcher', 'pyspark'},
+    config_schema={
+        'process_name': dagster.Field(str, is_required=True),
+    },
+)
+def solid_curated(context, path_source: str, path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'spark': context.resources.pyspark.spark_session,
+        'path_source': path_lake / path_source,
+        'path_target': path_lake / path_target,
+        'database': context.resources.database,
+        'process_name': context.solid_config['process_name'],
+    }
+
+    StructuredToCuratedEtl(**params).run()
 
     return path_target

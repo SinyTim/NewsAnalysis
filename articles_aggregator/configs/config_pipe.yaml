@@ -72,3 +72,27 @@ solids:
   solid_structured_tutby:
     inputs:
       path_target: 'structured/tutby.delta'
+
+  solid_curated_4gkb:
+    config:
+      process_name: 'curated_4gkb'
+    inputs:
+      path_target: 'curated/article.delta'
+
+  solid_curated_komzdrav:
+    config:
+      process_name: 'curated_komzdrav'
+    inputs:
+      path_target: 'curated/article.delta'
+
+  solid_curated_naviny:
+    config:
+      process_name: 'curated_naviny'
+    inputs:
+      path_target: 'curated/article.delta'
+
+  solid_curated_tutby:
+    config:
+      process_name: 'curated_tutby'
+    inputs:
+      path_target: 'curated/article.delta'

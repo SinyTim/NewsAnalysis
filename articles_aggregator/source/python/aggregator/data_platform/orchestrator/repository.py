@@ -58,6 +58,15 @@ def pipeline_main():
     path_structured_naviny = solids.solid_structured_naviny(path_source=path_html_naviny)
     path_structured_tutby = solids.solid_structured_tutby(path_source=path_html_tutby)
 
+    solid_curated_4gkb = solids.solid_curated.alias('solid_curated_4gkb')
+    solid_curated_komzdrav = solids.solid_curated.alias('solid_curated_komzdrav')
+    solid_curated_naviny = solids.solid_curated.alias('solid_curated_naviny')
+    solid_curated_tutby = solids.solid_curated.alias('solid_curated_tutby')
+    path_curated = solid_curated_4gkb(path_source=path_structured_4gkb)
+    path_curated = solid_curated_komzdrav(path_source=path_structured_komzdrav)
+    path_curated = solid_curated_naviny(path_source=path_structured_naviny)
+    path_curated = solid_curated_tutby(path_source=path_structured_tutby)
+
 
 @dagster.pipeline(mode_defs=[mode_local], preset_defs=[preset_local])
 def pipeline_test():
