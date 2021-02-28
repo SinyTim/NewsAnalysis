@@ -11,7 +11,6 @@ class StructuredHtmlEtl(IncrementalDeltaEtl):
         self.parse_return_type = f'{parse_return_type}, error string'
 
     def transform(self, df_html):
-        df_html = df_html.repartition(100)  # todo check
 
         parser = self.get_parser()
         parse_html = udf(parser, returnType=self.parse_return_type)
@@ -26,9 +25,9 @@ class StructuredHtmlEtl(IncrementalDeltaEtl):
             .filter(col('error').isNull()) \
             .drop('error')
 
-        df_bad = df \
-            .filter(col('error').isNotNull()) \
-            .select('url_id', 'error')
+        # df_bad = df \
+        #     .filter(col('error').isNotNull()) \
+        #     .select('url_id', 'error')
 
         return df_parsed
 

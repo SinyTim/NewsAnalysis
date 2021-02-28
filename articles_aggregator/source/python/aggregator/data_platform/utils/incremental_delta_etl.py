@@ -34,8 +34,8 @@ class IncrementalDeltaEtl(IncrementalEtl, ABC):
 
     def load(self, df):
 
-        if df.rdd.isEmpty():
-            return
+        # if df.rdd.isEmpty():
+        #     return
 
         df = df.withColumn('_time_updated', current_timestamp())
         function.write_delta(df, self.path_target)

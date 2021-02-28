@@ -17,6 +17,13 @@ mode_local = dagster.ModeDefinition(
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
             'spark.default.parallelism': 8,
+            # 'spark.executor.instances': 1,
+            # 'spark.executor.cores': 2,
+            # 'spark.executor.memory': '1g',
+            # 'spark.executor.heartbeatInterval': '3600s',
+            # 'spark.network.timeout': '7200s',
+            # 'spark.storage.blockManagerSlaveTimeoutMs': '3600s',
+            # 'spark.worker.timeout': '3600s',
         }}),
     }
 )

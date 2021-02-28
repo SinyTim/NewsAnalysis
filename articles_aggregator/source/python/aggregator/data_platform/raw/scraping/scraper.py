@@ -16,9 +16,8 @@ class Scraper(IncrementalDeltaEtl):
         get_html = udf(self.get_html)
         get_body = udf(self.get_body)
 
-        # todo set number of executors instead of repartition
+        # todo set 1 executor with 2 cores
         df_html = df_urls \
-            .repartition(2) \
             .withColumn('html', get_html('url')) \
             .withColumn('html', get_body('html')) \
             .select(col('id').alias('url_id'), 'html')
