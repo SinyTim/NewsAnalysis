@@ -1,13 +1,13 @@
 
 .ipynb_checkpoints/
+.idea/
 __pycache__/
 
 data/
 wandb/
 
+*.whl
 *.session
-
-.idea/
 
 **/dagster_home/*
 !**/dagster_home/*.yaml
