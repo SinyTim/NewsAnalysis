@@ -61,7 +61,7 @@ preset_local = dagster.PresetDefinition.from_files(
 )
 
 
-@dagster.pipeline(mode_defs=[mode_local], preset_defs=[preset_local, mode_dataproc])
+@dagster.pipeline(mode_defs=[mode_local, mode_dataproc], preset_defs=[preset_local])
 def pipeline_main():
 
     path_url_naviny = solids.solid_generator_naviny()
