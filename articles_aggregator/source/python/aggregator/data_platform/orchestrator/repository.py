@@ -41,8 +41,10 @@ mode_dataproc = dagster.ModeDefinition(
         'datalake': resources.datalake,
         'pyspark_step_launcher': no_step_launcher,
         'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
-            'spark.submit.pyFiles':
+            'spark.submit.pyFiles': ','.join([
                 dagster.file_relative_path(__file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
+                dagster.file_relative_path(__file__, '../../../../../packages/beautifulsoup4-4.9.3-py3-none-any.whl'),
+            ]),
             'spark.pyspark.python': '/opt/conda/miniconda3/bin/python',
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
