@@ -34,6 +34,21 @@ mode_local = dagster.ModeDefinition(
     }
 )
 
+mode_dataproc = dagster.ModeDefinition(
+    name='dataproc',
+    resource_defs={
+        'database': resources.postgres_database,
+        'datalake': resources.datalake,
+        'pyspark_step_launcher': no_step_launcher,
+        'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
+            'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
+            'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
+            'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
+            'spark.default.parallelism': 8,
+        }}),
+    }
+)
+
 
 preset_local = dagster.PresetDefinition.from_files(
     name='local',
@@ -46,7 +61,7 @@ preset_local = dagster.PresetDefinition.from_files(
 )
 
 
-@dagster.pipeline(mode_defs=[mode_local], preset_defs=[preset_local])
+@dagster.pipeline(mode_defs=[mode_local], preset_defs=[preset_local, mode_dataproc])
 def pipeline_main():
 
     path_url_naviny = solids.solid_generator_naviny()
