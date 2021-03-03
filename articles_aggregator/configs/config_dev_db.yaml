@@ -4,6 +4,6 @@ resources:
     config:
       host: '34.123.127.77'
       port: 5432
-      db_name: 'dbaudit'
+      db_name: 'dev_dbaudit'
       user_name: 'postgres'
       user_password: 'P@ssw0rd'

@@ -7,6 +7,7 @@ data/
 wandb/
 
 *.whl
+*.zip
 *.session
 
 **/dagster_home/*

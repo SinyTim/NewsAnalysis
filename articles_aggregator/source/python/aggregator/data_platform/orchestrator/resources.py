@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import dagster
 
 from aggregator.data_platform.utils.postgres_connection import PostgresConnection

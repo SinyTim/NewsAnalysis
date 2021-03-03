@@ -1,0 +1,5 @@
+
+resources:
+  datalake:
+    config:
+      path: 'file://C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\'

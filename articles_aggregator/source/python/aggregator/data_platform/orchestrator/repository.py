@@ -13,23 +13,22 @@ mode_local = dagster.ModeDefinition(
         'datalake': resources.datalake,
         'pyspark_step_launcher': no_step_launcher,
         'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
-            'spark.jars': r'C:\Users\Tim\Programs\spark\gcs-connector-hadoop3-latest.jar',
+            'spark.submit.pyFiles': ','.join([
+                dagster.file_relative_path(__file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
+            ]),
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
+            'spark.default.parallelism': 8,
+            'spark.jars': r'C:\Users\Tim\Programs\spark\gcs-connector-hadoop3-latest.jar',
             'spark.hadoop.fs.gs.impl': 'com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem',
             'spark.hadoop.fs.AbstractFileSystem.gs.impl': 'com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS',
             'spark.hadoop.google.cloud.auth.service.account.enable': 'true',
             'spark.hadoop.google.cloud.auth.service.account.json.keyfile':
                 dagster.file_relative_path(__file__, '../../../../../configs/gcs_keyfile.json'),
-            'spark.default.parallelism': 8,
             # 'spark.executor.instances': 1,
             # 'spark.executor.cores': 2,
             # 'spark.executor.memory': '1g',
-            # 'spark.executor.heartbeatInterval': '3600s',
-            # 'spark.network.timeout': '7200s',
-            # 'spark.storage.blockManagerSlaveTimeoutMs': '3600s',
-            # 'spark.worker.timeout': '3600s',
         }}),
     }
 )
@@ -43,9 +42,7 @@ mode_dataproc = dagster.ModeDefinition(
         'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
             'spark.submit.pyFiles': ','.join([
                 dagster.file_relative_path(__file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
-                dagster.file_relative_path(__file__, '../../../../../packages/beautifulsoup4-4.9.3-py3-none-any.whl'),
             ]),
-            'spark.pyspark.python': '/opt/conda/miniconda3/bin/python',
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
@@ -55,18 +52,32 @@ mode_dataproc = dagster.ModeDefinition(
 )
 
 
-preset_local = dagster.PresetDefinition.from_files(
-    name='local',
+preset_dev = dagster.PresetDefinition.from_files(
+    name='dev',
     config_files=[
-        dagster.file_relative_path(__file__, '../../../../../configs/config_db.yaml'),
-        dagster.file_relative_path(__file__, '../../../../../configs/config_lake.yaml'),
+        dagster.file_relative_path(__file__, '../../../../../configs/config_dev_db.yaml'),
+        dagster.file_relative_path(__file__, '../../../../../configs/config_dev_lake.yaml'),
         dagster.file_relative_path(__file__, '../../../../../configs/config_pipe.yaml'),
     ],
     mode='local',
 )
 
 
-@dagster.pipeline(mode_defs=[mode_local, mode_dataproc], preset_defs=[preset_local])
+preset_prod = dagster.PresetDefinition.from_files(
+    name='prod',
+    config_files=[
+        dagster.file_relative_path(__file__, '../../../../../configs/config_prod_db.yaml'),
+        dagster.file_relative_path(__file__, '../../../../../configs/config_prod_lake.yaml'),
+        dagster.file_relative_path(__file__, '../../../../../configs/config_pipe.yaml'),
+    ],
+    mode='dataproc',
+)
+
+
+@dagster.pipeline(
+    mode_defs=[mode_local, mode_dataproc],
+    preset_defs=[preset_dev, preset_prod],
+)
 def pipeline_main():
 
     path_url_naviny = solids.solid_generator_naviny()
@@ -94,18 +105,18 @@ def pipeline_main():
     path_curated = solid_curated_tutby(path_source=path_structured_tutby)
 
 
-@dagster.pipeline(mode_defs=[mode_local], preset_defs=[preset_local])
+@dagster.pipeline(mode_defs=[mode_local], preset_defs=[preset_dev])
 def pipeline_test():
     path_structured_tutby = solids.solid_structured_tutby()
 
 
 @dagster.schedule(
-    cron_schedule='*/10 * * * *',
+    cron_schedule='0 */3 * * *',
     pipeline_name='pipeline_main',
-    mode='local',
+    mode='dataproc',
 )
 def schedule_main(context):
-    return preset_local.run_config
+    return preset_dev.run_config
 
 
 @dagster.repository
