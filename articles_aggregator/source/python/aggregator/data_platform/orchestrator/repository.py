@@ -49,6 +49,7 @@ mode_dataproc = dagster.ModeDefinition(
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
             'spark.default.parallelism': 8,
+            'spark.pyspark.python': '/opt/conda/miniconda3/bin/python',
         }}),
     }
 )
