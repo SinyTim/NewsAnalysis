@@ -13,9 +13,6 @@ class Scraper(IncrementalDeltaEtl):
 
     def transform(self, df_urls):
 
-        get_html = udf(self.get_html)
-        get_body = udf(self.get_body)
-
         # todo set 1 executor with 2 cores
         df_html = df_urls \
             .withColumn('html', get_html('url')) \
@@ -24,14 +21,16 @@ class Scraper(IncrementalDeltaEtl):
 
         return df_html
 
-    @staticmethod
-    def get_html(url: str) -> str:
-        response = requests.get(url)
-        html = response.text
-        return html
 
-    @staticmethod
-    def get_body(page: str) -> str:
-        soup = BeautifulSoup(page, 'html.parser')
-        body = str(soup.body)
-        return body
+@udf
+def get_html(url: str) -> str:
+    response = requests.get(url)
+    html = response.text
+    return html
+
+
+@udf
+def get_body(page: str) -> str:
+    soup = BeautifulSoup(page, 'html.parser')
+    body = str(soup.body)
+    return body
