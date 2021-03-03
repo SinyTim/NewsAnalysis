@@ -15,6 +15,7 @@ mode_local = dagster.ModeDefinition(
         'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
             'spark.submit.pyFiles': ','.join([
                 dagster.file_relative_path(__file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
+                dagster.file_relative_path(__file__, '../../../../../packages/dependencies.zip'),
             ]),
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
@@ -42,6 +43,7 @@ mode_dataproc = dagster.ModeDefinition(
         'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
             'spark.submit.pyFiles': ','.join([
                 dagster.file_relative_path(__file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
+                dagster.file_relative_path(__file__, '../../../../../packages/dependencies.zip'),
             ]),
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
