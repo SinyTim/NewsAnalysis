@@ -44,6 +44,7 @@ mode_dataproc = dagster.ModeDefinition(
             'spark.submit.pyFiles': ','.join([
                 dagster.file_relative_path(__file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
                 dagster.file_relative_path(__file__, '../../../../../packages/dependencies.zip'),
+                dagster.file_relative_path(__file__, '../../../../../packages/beautifulsoup4-4.9.3-py3-none-any.whl'),
             ]),
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
