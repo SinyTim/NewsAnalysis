@@ -6,6 +6,10 @@ from aggregator.data_platform.orchestrator import resources
 from aggregator.data_platform.orchestrator import solids
 
 
+import os
+os.environ['PYSPARK_PYTHON'] = './environment/bin/python'
+
+
 mode_local = dagster.ModeDefinition(
     name='local',
     resource_defs={
