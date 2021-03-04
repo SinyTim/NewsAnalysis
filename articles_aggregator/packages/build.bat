@@ -1,7 +1,10 @@
 
 pip install --requirement requirements_job.txt --target ./dependencies --upgrade
-tar -a -c -f dependencies.zip ./dependencies
-rmdir /s /q dependencies
+cd dependencies
+zip -r ../dependencies.zip .
+rm -r dependencies
+REM tar -a -c -f dependencies.zip ./dependencies
+REM rmdir /s /q dependencies
 
 cd ../source/python
 python setup.py sdist bdist_wheel --dist-dir "../../packages"
