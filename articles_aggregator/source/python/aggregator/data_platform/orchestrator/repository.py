@@ -14,8 +14,9 @@ mode_local = dagster.ModeDefinition(
         'pyspark_step_launcher': no_step_launcher,
         'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
             'spark.submit.pyFiles': ','.join([
-                dagster.file_relative_path(__file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
-                dagster.file_relative_path(__file__, '../../../../../packages/dependencies.zip'),
+                dagster.file_relative_path(
+                    __file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
+                # dagster.file_relative_path(__file__, '../../../../../packages/dependencies.zip'),
             ]),
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
@@ -43,9 +44,12 @@ mode_dataproc = dagster.ModeDefinition(
         'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
             'spark.submit.pyFiles': ','.join([
                 dagster.file_relative_path(__file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
-                dagster.file_relative_path(__file__, '../../../../../packages/dependencies.zip'),
-                # dagster.file_relative_path(__file__, '../../../../../packages/beautifulsoup4-4.9.3-py3-none-any.whl'),
+                # dagster.file_relative_path(__file__, '../../../../../packages/dependencies.zip'),
             ]),
+            'spark.archives': dagster.file_relative_path(
+                __file__, '../../../../../packages/pyspark_conda_env.tar.gz#environment'),
+            'spark.pyspark.driver.python': 'python3',
+            'spark.pyspark.python': './environment/bin/python',
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',

@@ -2,6 +2,7 @@
 pip install --requirement requirements_job.txt --target ./dependencies --upgrade
 cd dependencies
 zip -r ../dependencies.zip .
+cd ..
 rm -r dependencies
 REM tar -a -c -f dependencies.zip ./dependencies
 REM rmdir /s /q dependencies
