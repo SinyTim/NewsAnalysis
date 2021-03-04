@@ -50,7 +50,7 @@ mode_dataproc = dagster.ModeDefinition(
                 __file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
             'spark.archives': dagster.file_relative_path(
                 __file__, '../../../../../packages/pyspark_conda_env.tar.gz#environment'),
-            # 'spark.pyspark.driver.python': 'python3',
+            # 'spark.pyspark.driver.python': 'python',
             # 'spark.pyspark.python': './environment/bin/python',
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
