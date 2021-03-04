@@ -1,3 +1,5 @@
+import os
+
 import dagster
 import dagster_pyspark
 from dagster.core.definitions.no_step_launcher import no_step_launcher
@@ -6,7 +8,6 @@ from aggregator.data_platform.orchestrator import resources
 from aggregator.data_platform.orchestrator import solids
 
 
-import os
 os.environ['PYSPARK_PYTHON'] = './environment/bin/python'
 
 
@@ -17,11 +18,10 @@ mode_local = dagster.ModeDefinition(
         'datalake': resources.datalake,
         'pyspark_step_launcher': no_step_launcher,
         'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
-            'spark.submit.pyFiles': ','.join([
-                dagster.file_relative_path(
-                    __file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
-                # dagster.file_relative_path(__file__, '../../../../../packages/dependencies.zip'),
-            ]),
+            'spark.submit.pyFiles': dagster.file_relative_path(
+                __file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
+            'spark.archives': dagster.file_relative_path(
+                __file__, '../../../../../packages/pyspark_conda_env.tar.gz#environment'),
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
@@ -46,14 +46,12 @@ mode_dataproc = dagster.ModeDefinition(
         'datalake': resources.datalake,
         'pyspark_step_launcher': no_step_launcher,
         'pyspark': dagster_pyspark.pyspark_resource.configured({'spark_conf': {
-            'spark.submit.pyFiles': ','.join([
-                dagster.file_relative_path(__file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
-                # dagster.file_relative_path(__file__, '../../../../../packages/dependencies.zip'),
-            ]),
+            'spark.submit.pyFiles': dagster.file_relative_path(
+                __file__, '../../../../../packages/articles_aggregator-0.0.0-py3-none-any.whl'),
             'spark.archives': dagster.file_relative_path(
                 __file__, '../../../../../packages/pyspark_conda_env.tar.gz#environment'),
-            'spark.pyspark.driver.python': 'python3',
-            'spark.pyspark.python': './environment/bin/python',
+            # 'spark.pyspark.driver.python': 'python3',
+            # 'spark.pyspark.python': './environment/bin/python',
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
