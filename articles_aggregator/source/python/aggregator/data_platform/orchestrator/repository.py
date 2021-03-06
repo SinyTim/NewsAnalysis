@@ -125,7 +125,7 @@ def pipeline_test():
     mode='dataproc',
 )
 def schedule_main(context):
-    return preset_dev.run_config
+    return preset_prod.run_config
 
 
 @dagster.repository

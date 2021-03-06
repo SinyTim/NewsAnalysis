@@ -9,5 +9,5 @@ source build.sh
 
 export DAGSTER_HOME=$HOME/NewsAnalysis/articles_aggregator/dagster_home
 cd $DAGSTER_HOME
-$HOME/.local/bin/dagster-daemon run &
-$HOME/.local/bin/dagit -h 0.0.0.0 -p 3000 &
+nohup $HOME/.local/bin/dagster-daemon run &
+nohup $HOME/.local/bin/dagit -h 0.0.0.0 -p 3000 &
