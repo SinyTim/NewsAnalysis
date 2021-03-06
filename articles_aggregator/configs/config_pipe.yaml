@@ -31,14 +31,14 @@ solids:
       path_bad_data: 'bad/urls.delta'
       path_target: 'raw/url/naviny.delta'
     config:
-      default_start_state: '2021/02/20'
+      default_start_state: '2021/03/01'
 
   solid_generator_tutby:
     inputs:
       path_bad_data: 'bad/urls.delta'
       path_target: 'raw/url/tutby.delta'
     config:
-      default_start_state: '720500'
+      default_start_state: '721400'
       max_n_fails: 10
 
   solid_scraper_4gkb:
@@ -96,3 +96,9 @@ solids:
       process_name: 'curated_tutby'
     inputs:
       path_target: 'curated/article.delta'
+
+  solid_preprocessing:
+    config:
+      process_name: 'preprocessing'
+    inputs:
+      path_target: 'analytics/preprocessed.delta'

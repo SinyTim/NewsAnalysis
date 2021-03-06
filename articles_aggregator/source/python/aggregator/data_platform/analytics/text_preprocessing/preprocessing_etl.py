@@ -4,59 +4,68 @@ import string
 import nltk
 import pandas as pd
 import pymystem3
+from pyspark.sql.functions import pandas_udf
 
-from aggregator.data_platform.utils.auditable_etl import AuditableEtl
+from aggregator.data_platform.utils.incremental_delta_etl import IncrementalDeltaEtl
 
 
-class PreprocessingEtl(AuditableEtl):
+class PreprocessingEtl(IncrementalDeltaEtl):
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs, destination_extension='parquet')
+        super().__init__(**kwargs)
+
+    def transform(self, df):
+
+        preprocess = self.get_udf()
+
+        df = df.select(
+            'url_id',
+            preprocess('header').alias('header'),
+            preprocess('document').alias('document'),
+        )
+
+        return df
+
+    def get_udf(self):
 
         nltk.download('stopwords')
-        self.russian_stop_words = nltk.corpus.stopwords.words('russian')
-        self.russian_stop_words = set(self.russian_stop_words)
+        russian_stop_words = nltk.corpus.stopwords.words('russian')
+        russian_stop_words = set(russian_stop_words)
+        bc_russian_stop_words = self.spark.sparkContext.broadcast(russian_stop_words)
 
-        self.mystem = pymystem3.Mystem()
+        @pandas_udf(returnType='string')
+        def preprocess(documents: pd.Series) -> pd.Series:
 
-    def extract(self, source):
-        data = [pd.read_parquet(path_file) for path_file in source]
-        data = pd.concat(data, ignore_index=True, sort=True)
-        return data
+            separator = 'qsefthukoaxdvgnjthukoaxdvefcngwojd'
 
-    def transform(self, data):
-        processed = data[['url_id']]
-        processed['header'] = self.preprocess(data['header'])
-        processed['document'] = self.preprocess(data['document'])
-        return processed
+            document = f' {separator} '.join(documents)
+            document = preprocess_document(document, bc_russian_stop_words.value)
+            documents = document.split(separator)
 
-    def load(self, data, destination):
-        data.to_parquet(destination, index=False)
+            documents = [_.strip() for _ in documents]
 
-    def preprocess(self, corpus, batch_size=1000):
+            return pd.Series(documents)
 
-        separator = 'qsefthukoaxdvgnjthukoaxdvefcngwojd'
-        corpus_processed = []
+        return preprocess
 
-        for i in range(len(corpus) // batch_size + 1):
-            batch = corpus[i * batch_size:(i + 1) * batch_size]
-            batch_joint = f' {separator} '.join(batch)
-            batch_clean = self.preprocess_document(batch_joint)
-            batch_clean = batch_clean.split(separator)
-            corpus_processed += batch_clean
 
-        corpus_processed = [_.strip() for _ in corpus_processed]
+def preprocess_document(document, russian_stop_words):
 
-        return corpus_processed
+    document = document.lower()
+    document = re.sub(u'\xa0|\n', ' ', document)
+    document = re.sub('[^а-яa-z ]', '', document)
 
-    def preprocess_document(self, document):
-        document = document.lower()
-        document = re.sub(u'\xa0|\n', ' ', document)
-        document = re.sub('[^а-яa-z ]', '', document)
-        # removing extra spaces...
-        tokens = self.mystem.lemmatize(document)
-        tokens = [token for token in tokens if
-                  ((token not in self.russian_stop_words) and (token.strip() not in string.punctuation) and (
-                              len(token) > 2))]
-        document = ' '.join(tokens)
-        return document
+    mystem = pymystem3.Mystem()
+    tokens = mystem.lemmatize(document)
+
+    tokens = [
+        token
+        for token in tokens
+        if ((token not in russian_stop_words)
+            and (token.strip() not in string.punctuation)
+            and (len(token) > 2))
+    ]
+
+    document = ' '.join(tokens)
+
+    return document
