@@ -7,6 +7,21 @@ from aggregator.data_platform.raw.scraping.url_generation.generator_int import U
 from aggregator.data_platform.structured.medicine import StructuredEtlMedicine
 from aggregator.data_platform.structured.naviny import StructuredEtlNaviny
 from aggregator.data_platform.structured.tutby import StructuredEtlTutby
+from aggregator.data_platform.utils.export_etl import ExportEtl
+
+
+@dagster.solid(required_resource_keys={'pyspark_step_launcher', 'pyspark'})
+def solid_export(context, path_source: str, path_target: str) -> str:
+
+    params = {
+        'spark': context.resources.pyspark.spark_session,
+        'path_source': path_source,
+        'path_target': path_target,
+    }
+
+    ExportEtl(**params).run()
+
+    return path_target
 
 
 @dagster.solid(

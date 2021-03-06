@@ -17,6 +17,22 @@ def write_delta(df, path, mode='append'):
         .save(str(path))
 
 
+def write_csv(df, path):
+    df.write \
+        .format('com.databricks.spark.csv') \
+        .mode('overwrite') \
+        .option('header', 'true') \
+        .option('delimiter', ',') \
+        .save(path)
+
+
+def write_json(df, path):
+    df.write \
+        .format('json') \
+        .mode('overwrite') \
+        .save(path)
+
+
 def read_parquet(path_dir: Path = None, paths=None):
     assert (path_dir is None) != (paths is None)
 

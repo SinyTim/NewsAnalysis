@@ -8,6 +8,7 @@ wandb/
 
 *.whl
 *.zip
+*.tar.gz
 *.session
 
 **/dagster_home/*

@@ -83,6 +83,15 @@ preset_prod = dagster.PresetDefinition.from_files(
 )
 
 
+preset_export = dagster.PresetDefinition.from_files(
+    name='export',
+    config_files=[
+        dagster.file_relative_path(__file__, '../../../../../configs/config_export.yaml'),
+    ],
+    mode='local',
+)
+
+
 @dagster.pipeline(
     mode_defs=[mode_local, mode_dataproc],
     preset_defs=[preset_dev, preset_prod],
@@ -114,6 +123,11 @@ def pipeline_main():
     path_curated = solid_curated_tutby(path_source=path_structured_tutby)
 
 
+@dagster.pipeline(mode_defs=[mode_local, mode_dataproc], preset_defs=[preset_export])
+def pipeline_export():
+    path_target = solids.solid_export()
+
+
 @dagster.pipeline(mode_defs=[mode_local], preset_defs=[preset_dev])
 def pipeline_test():
     path_structured_tutby = solids.solid_structured_tutby()
@@ -130,4 +144,4 @@ def schedule_main(context):
 
 @dagster.repository
 def repository_main():
-    return [pipeline_test, pipeline_main, schedule_main]
+    return [pipeline_test, pipeline_export, pipeline_main, schedule_main]

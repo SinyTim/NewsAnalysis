@@ -1,0 +1,6 @@
+
+solids:
+  solid_export:
+    inputs:
+      path_source: 'gs://bct-aggr/datalake/curated/article.delta'
+      path_target: 'file:///C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\article.json'

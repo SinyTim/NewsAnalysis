@@ -1,4 +1,5 @@
 
+# set DAGSTER_HOME=path/dagster_home
 # dagster-daemon run
 # dagit
 
