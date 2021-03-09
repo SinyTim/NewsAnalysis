@@ -1,5 +1,6 @@
 
 # git clone https://github.com/SinyTim/NewsAnalysis.git
+# todo use one env for master and workers
 
 cd $HOME/NewsAnalysis/articles_aggregator
 pip install -r requirements.txt
