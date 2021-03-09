@@ -9,4 +9,6 @@ dependencies:
   - beautifulsoup4
   - pandas
   - nltk
-  - pymystem3
+  - pip
+  - pip:
+    - pymystem3
