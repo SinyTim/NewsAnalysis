@@ -3,8 +3,9 @@ dagster
 dagster-pyspark
 dagit
 psycopg2
+pandas
+pyarrow
 requests
 beautifulsoup4
-pandas
 nltk
 pymystem3
