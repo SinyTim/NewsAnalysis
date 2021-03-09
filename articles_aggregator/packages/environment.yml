@@ -4,7 +4,9 @@ channels:
 dependencies:
   - python=3.8
   - conda-pack
-  - beautifulsoup4
   - psycopg2
   - requests
+  - beautifulsoup4
   - pandas
+  - nltk
+  - pymystem3

@@ -2,7 +2,9 @@ pyspark
 dagster
 dagster-pyspark
 dagit
+psycopg2
 requests
 beautifulsoup4
-psycopg2
 pandas
+nltk
+pymystem3
