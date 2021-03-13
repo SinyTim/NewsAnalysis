@@ -134,6 +134,7 @@ def pipeline_main():
     path_curated = solid_fiction(p0=path_curated_0, p1=path_curated_1)
 
     path_preprocessed = solids.solid_preprocessing(path_source=path_curated)
+    path_embeddings = solids.solid_word2vec(path_source=path_preprocessed)
 
 
 @dagster.pipeline(mode_defs=[mode_local, mode_dataproc], preset_defs=[preset_export])

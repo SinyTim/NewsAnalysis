@@ -22,12 +22,17 @@ if __name__ == '__main__':
         .config('spark.sql.catalog.spark_catalog', 'org.apache.spark.sql.delta.catalog.DeltaCatalog') \
         .getOrCreate()
 
-    path0 = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\curated\article.delta')
-    path1 = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\analytics\preprocessed.delta')
+    # path0 = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\curated\article.delta')
+    # path1 = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\analytics\preprocessed.delta')
+    #
+    # df0 = read_delta(spark, path0)
+    # df1 = read_delta(spark, path1)
+    #
+    # df = df0.join(df1, on='url_id')
+    #
+    # print(df.show(3, True))
 
-    df0 = read_delta(spark, path0)
-    df1 = read_delta(spark, path1)
-
-    df = df0.join(df1, on='url_id')
-
-    print(df.show(3, True))
+    path = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\analytics\embedding.delta')
+    df = read_delta(spark, path)
+    print(df.count())
+    # print(df.show(5, True))

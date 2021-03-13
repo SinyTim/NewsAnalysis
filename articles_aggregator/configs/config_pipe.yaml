@@ -102,3 +102,11 @@ solids:
       process_name: 'preprocessing'
     inputs:
       path_target: 'analytics/preprocessed.delta'
+
+  solid_word2vec:
+    config:
+      process_name: 'word2vec'
+      path_word2vec: 'models/word2vec/model.model'
+      path_idf: 'models/idf/idf.csv'
+    inputs:
+      path_target: 'analytics/embedding.delta'

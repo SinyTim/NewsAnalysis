@@ -18,15 +18,15 @@ if __name__ == '__main__':
     #     run_config=repository.preset_dev.run_config
     # )
 
-    x = [
-        'solid_curated_4gkb', 'solid_curated_komzdrav', 'solid_generator_4gkb',
-        'solid_generator_komzdrav', 'solid_scraper_4gkb', 'solid_scraper_komzdrav',
-        'solid_structured_4gkb', 'solid_structured_komzdrav'
-    ]
-
-    for c in x:
-        if c in repository.preset_dev.run_config['solids']:
-            repository.preset_dev.run_config['solids'].pop(c)
+    # x = [
+    #     'solid_curated_4gkb', 'solid_curated_komzdrav', 'solid_generator_4gkb',
+    #     'solid_generator_komzdrav', 'solid_scraper_4gkb', 'solid_scraper_komzdrav',
+    #     'solid_structured_4gkb', 'solid_structured_komzdrav'
+    # ]
+    #
+    # for c in x:
+    #     if c in repository.preset_dev.run_config['solids']:
+    #         repository.preset_dev.run_config['solids'].pop(c)
 
     dagster.execute_pipeline(
         repository.pipeline_main,
