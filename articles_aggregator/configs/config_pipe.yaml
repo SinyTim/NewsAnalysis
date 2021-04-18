@@ -31,14 +31,14 @@ solids:
       path_bad_data: 'bad/urls.delta'
       path_target: 'raw/url/naviny.delta'
     config:
-      default_start_state: '2021/03/01'
+      default_start_state: '2021/04/11'
 
   solid_generator_tutby:
     inputs:
       path_bad_data: 'bad/urls.delta'
       path_target: 'raw/url/tutby.delta'
     config:
-      default_start_state: '721400'
+      default_start_state: '726400'
       max_n_fails: 10
 
 #  solid_scraper_4gkb:
@@ -110,3 +110,14 @@ solids:
       path_idf: 'models/idf/idf.csv'
     inputs:
       path_target: 'analytics/embedding.delta'
+
+  solid_umap:
+    config:
+      process_name: 'umap'
+      path_umap: 'models/umap/umap.pickle'
+    inputs:
+      path_target: 'analytics/postprocessing_umap.delta'
+
+  solid_clustering:
+    inputs:
+      path_target: 'analytics/clustring.delta'

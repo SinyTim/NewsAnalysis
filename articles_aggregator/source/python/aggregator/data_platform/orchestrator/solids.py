@@ -2,6 +2,8 @@ from pathlib import Path
 
 import dagster
 
+from aggregator.data_platform.analytics.clustering.clustering_etl import ClusteringEtl
+from aggregator.data_platform.analytics.embedding.postprocessing.umap_etl import UmapEtl
 from aggregator.data_platform.analytics.embedding.word2vec_etl import Word2vecEtl
 from aggregator.data_platform.analytics.text_preprocessing.preprocessing_etl import PreprocessingEtl
 from aggregator.data_platform.curated.structured_to_curated_etl import StructuredToCuratedEtl
@@ -40,7 +42,7 @@ def solid_generator_naviny(context, path_target: str, path_bad_data: str) -> str
 
     params = {
         'spark': context.resources.pyspark.spark_session,
-        'url_template': 'https://naviny.media/day/{}',
+        'url_template': 'https://naviny.online/day/{}',
         'path_target': path_lake + path_target,
         'path_bad_data': path_lake + path_bad_data,
         'database': context.resources.database,
@@ -347,5 +349,48 @@ def solid_word2vec(context, path_source: str, path_target: str) -> str:
     }
 
     Word2vecEtl(**params).run()
+
+    return path_target
+
+
+@dagster.solid(
+    required_resource_keys={'database', 'datalake', 'pyspark_step_launcher', 'pyspark'},
+    config_schema={
+        'process_name': dagster.Field(str, is_required=True),
+        'path_umap': dagster.Field(str, is_required=True),
+    },
+)
+def solid_umap(context, path_source: str, path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'path_umap': Path(path_lake + context.solid_config['path_umap']).as_posix().replace('file:/', ''),
+        'spark': context.resources.pyspark.spark_session,
+        'path_source': path_lake + path_source,
+        'path_target': path_lake + path_target,
+        'database': context.resources.database,
+        'process_name': context.solid_config['process_name'],
+    }
+
+    UmapEtl(**params).run()
+
+    return path_target
+
+
+@dagster.solid(
+    required_resource_keys={'datalake', 'pyspark_step_launcher', 'pyspark'},
+)
+def solid_clustering(context, path_source: str, path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'spark': context.resources.pyspark.spark_session,
+        'path_source': path_lake + path_source,
+        'path_target': path_lake + path_target,
+    }
+
+    ClusteringEtl(**params).run()
 
     return path_target

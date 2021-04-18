@@ -2,32 +2,27 @@ import pickle
 
 import numpy as np
 
-from aggregator.data_platform.utils.auditable_etl import AuditableEtl
-from aggregator.data_platform.utils.function import read_parquet
+from aggregator.data_platform.utils.incremental_delta_etl import IncrementalDeltaEtl
 
 
-class UmapEtl(AuditableEtl):
+class UmapEtl(IncrementalDeltaEtl):
 
     def __init__(self, path_umap, **kwargs):
-        super().__init__(**kwargs, destination_extension='parquet')
+        super().__init__(**kwargs)
 
         with open(path_umap, 'rb') as file:
             self.model_umap = pickle.load(file)
 
-    def extract(self, source):
-        return read_parquet(paths=source)
+    def transform(self, df):
 
-    def transform(self, data):
-
-        embeddings = data['embedding_document'].to_list()
+        df = df.select('url_id', 'embedding_document').toPandas()
+        embeddings = df['embedding_document'].to_list()
         embeddings = np.array(embeddings, dtype=np.float32)
 
         embeddings = self.model_umap.transform(embeddings)
 
-        processed = data[['url_id']]
+        processed = df[['url_id']]
         processed['embedding_document'] = embeddings.tolist()
+        processed = self.spark.createDataFrame(processed)
 
         return processed
-
-    def load(self, data, destination):
-        data.to_parquet(destination, index=False)

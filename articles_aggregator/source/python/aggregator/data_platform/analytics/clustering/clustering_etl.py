@@ -1,22 +1,33 @@
 import hdbscan
 import numpy as np
 
-from aggregator.data_platform.utils.auditable_etl import AuditableEtl
-from aggregator.data_platform.utils.function import read_parquet
+from aggregator.data_platform.utils import function
 
 
-class ClusteringEtl(AuditableEtl):
+class ClusteringEtl:
 
-    def __init__(self, full_reload=True,  **kwargs):
-        super().__init__(**kwargs, destination_extension='parquet')
+    def __init__(self, spark, path_source, path_target, full_reload=True):
+
+        self.spark = spark
+        self.path_source = path_source
+        self.path_target = path_target
 
         self.full_reload = full_reload
 
-    def extract(self, source):
-        return read_parquet(paths=source)
+    def run(self):
+        df = self.extract()
+        df = self.transform(df)
+        self.load(df)
 
-    def transform(self, data):
+    def extract(self):
+        return function.read_delta(self.spark, self.path_source)
 
+    def load(self, df):
+        function.write_delta(df, self.path_target, mode='overwrite')
+
+    def transform(self, df):
+
+        data = df.toPandas()
         embeddings = data['embedding_document'].to_list()
         embeddings = np.array(embeddings, dtype=np.float32)
 
@@ -30,20 +41,6 @@ class ClusteringEtl(AuditableEtl):
 
         processed = data[['url_id']]
         processed['topic_id'] = cluster.labels_
+        processed = self.spark.createDataFrame(processed)
 
         return processed
-
-    def load(self, data, destination):
-
-        if self.full_reload:
-            for path in self.path_destination.iterdir():
-                path.unlink()
-
-        data.to_parquet(destination, index=False)
-
-    def get_unprocessed_source(self):
-        if self.full_reload:
-            path_files = {path_file.as_posix() for path_file in self.path_source.iterdir()}
-            return path_files
-        else:
-            raise NotImplementedError

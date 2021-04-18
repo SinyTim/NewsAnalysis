@@ -8,7 +8,7 @@ from aggregator.data_platform.orchestrator import resources
 from aggregator.data_platform.orchestrator import solids
 
 
-os.environ['PYSPARK_PYTHON'] = './environment/bin/python'
+# os.environ['PYSPARK_PYTHON'] = './environment/bin/python'
 
 
 mode_local = dagster.ModeDefinition(
@@ -135,6 +135,8 @@ def pipeline_main():
 
     path_preprocessed = solids.solid_preprocessing(path_source=path_curated)
     path_embeddings = solids.solid_word2vec(path_source=path_preprocessed)
+    path_umap = solids.solid_umap(path_source=path_embeddings)
+    path_clustering = solids.solid_clustering(path_source=path_umap)
 
 
 @dagster.pipeline(mode_defs=[mode_local, mode_dataproc], preset_defs=[preset_export])
