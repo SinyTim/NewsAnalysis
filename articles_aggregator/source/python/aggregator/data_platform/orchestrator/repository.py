@@ -25,9 +25,10 @@ mode_local = dagster.ModeDefinition(
             'spark.jars.packages': 'io.delta:delta-core_2.12:0.8.0',
             'spark.sql.extensions': 'io.delta.sql.DeltaSparkSessionExtension',
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
+            'spark.sql.adaptive.enabled': 'true',
             'spark.sql.execution.arrow.pyspark.enabled': 'true',
             'spark.sql.execution.arrow.maxRecordsPerBatch': 10000,
-            'spark.default.parallelism': 8,
+            # 'spark.default.parallelism': 8,
             'spark.jars': r'C:\Users\Tim\Programs\spark\gcs-connector-hadoop3-latest.jar',
             'spark.hadoop.fs.gs.impl': 'com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem',
             'spark.hadoop.fs.AbstractFileSystem.gs.impl': 'com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS',
@@ -37,6 +38,7 @@ mode_local = dagster.ModeDefinition(
             # 'spark.executor.instances': 1,
             # 'spark.executor.cores': 2,
             # 'spark.executor.memory': '1g',
+            # 'spark.driver.memory': '1g',
         }}),
     }
 )
@@ -96,16 +98,8 @@ preset_export = dagster.PresetDefinition.from_files(
 )
 
 
-@dagster.solid
-def solid_fiction(context, p0, p1) -> str:
-    return p0
-
-
-@dagster.pipeline(
-    mode_defs=[mode_local, mode_dataproc],
-    preset_defs=[preset_dev, preset_prod],
-)
-def pipeline_main():
+@dagster.composite_solid
+def composite_curated() -> str:
 
     path_url_naviny = solids.solid_generator_naviny()
     path_url_tutby = solids.solid_generator_tutby()
@@ -117,36 +111,45 @@ def pipeline_main():
     # path_html_komzdrav = solids.solid_scraper_komzdrav(path_source=path_url_komzdrav)
     # path_html_4gkb = solids.solid_scraper_4gkb(path_source=path_url_4gkb)
 
-    # path_structured_4gkb = solids.solid_structured_4gkb(path_source=path_html_4gkb)
-    # path_structured_komzdrav = solids.solid_structured_komzdrav(path_source=path_html_komzdrav)
     path_structured_naviny = solids.solid_structured_naviny(path_source=path_html_naviny)
     path_structured_tutby = solids.solid_structured_tutby(path_source=path_html_tutby)
+    # path_structured_4gkb = solids.solid_structured_4gkb(path_source=path_html_4gkb)
+    # path_structured_komzdrav = solids.solid_structured_komzdrav(path_source=path_html_komzdrav)
 
-    # solid_curated_4gkb = solids.solid_curated.alias('solid_curated_4gkb')
-    # solid_curated_komzdrav = solids.solid_curated.alias('solid_curated_komzdrav')
     solid_curated_naviny = solids.solid_curated.alias('solid_curated_naviny')
     solid_curated_tutby = solids.solid_curated.alias('solid_curated_tutby')
+    # solid_curated_4gkb = solids.solid_curated.alias('solid_curated_4gkb')
+    # solid_curated_komzdrav = solids.solid_curated.alias('solid_curated_komzdrav')
+    path_curated = solid_curated_naviny(path_source=path_structured_naviny)
+    path_curated = solid_curated_tutby(path_source=path_structured_tutby)
     # path_curated = solid_curated_4gkb(path_source=path_structured_4gkb)
     # path_curated = solid_curated_komzdrav(path_source=path_structured_komzdrav)
-    path_curated_0 = solid_curated_naviny(path_source=path_structured_naviny)
-    path_curated_1 = solid_curated_tutby(path_source=path_structured_tutby)
 
-    path_curated = solid_fiction(p0=path_curated_0, p1=path_curated_1)
+    return path_curated
 
+
+@dagster.composite_solid
+def composite_analytics(path_curated: str):
     path_preprocessed = solids.solid_preprocessing(path_source=path_curated)
     path_embeddings = solids.solid_word2vec(path_source=path_preprocessed)
     path_umap = solids.solid_umap(path_source=path_embeddings)
     path_clustering = solids.solid_clustering(path_source=path_umap)
+    path_topicwords = solids.solid_topicwords(path_source_topic_ids=path_clustering,
+                                              path_source_documents=path_preprocessed)
+
+
+@dagster.pipeline(
+    mode_defs=[mode_local, mode_dataproc],
+    preset_defs=[preset_dev, preset_prod],
+)
+def pipeline_main():
+    path_curated = composite_curated()
+    composite_analytics(path_curated)
 
 
 @dagster.pipeline(mode_defs=[mode_local, mode_dataproc], preset_defs=[preset_export])
 def pipeline_export():
     path_target = solids.solid_export()
-
-
-@dagster.pipeline(mode_defs=[mode_local], preset_defs=[preset_dev])
-def pipeline_test():
-    path_structured_tutby = solids.solid_structured_tutby()
 
 
 @dagster.schedule(
@@ -160,4 +163,4 @@ def schedule_main(context):
 
 @dagster.repository
 def repository_main():
-    return [pipeline_test, pipeline_export, pipeline_main, schedule_main]
+    return [pipeline_export, pipeline_main, schedule_main]

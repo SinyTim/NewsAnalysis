@@ -1,18 +1,21 @@
 import numpy as np
 import pandas as pd
+from pyspark.sql.functions import col
+from pyspark.sql.functions import collect_list
+from pyspark.sql.functions import concat_ws
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from aggregator.data_platform.utils.auditable_etl import AuditableEtl
-from aggregator.data_platform.utils.function import read_parquet
+from aggregator.data_platform.utils import function
 
 
-class TopicKeywordEtl(AuditableEtl):
+class TopicKeywordEtl:
 
-    def __init__(self, path_documents, path_topic_ids, path_idf, n_words=5, **kwargs):
-        super().__init__(**kwargs, destination_extension='parquet')
+    def __init__(self, spark, path_source_topic_ids, path_source_documents, path_target, path_idf, n_words=5):
 
-        self.path_documents = path_documents
-        self.path_topic_ids = path_topic_ids
+        self.spark = spark
+        self.path_source_topic_ids = path_source_topic_ids
+        self.path_source_documents = path_source_documents
+        self.path_target = path_target
 
         self.n_words = n_words
 
@@ -20,23 +23,27 @@ class TopicKeywordEtl(AuditableEtl):
         self.model_word2idf = dict(zip(self.model_word2idf['token'], self.model_word2idf['idf']))
 
     def run(self):
-        destination = self.get_destination()
-        data = self.extract(None)
+        data = self.extract()
         data = self.transform(data)
-        self.load(data, destination)
+        self.load(data)
 
-    def extract(self, source):
-        df_documents = read_parquet(path_dir=self.path_documents)
-        df_topic_id = read_parquet(path_dir=self.path_topic_ids)
+    def extract(self):
+        df_topic_id = function.read_delta(self.spark, self.path_source_topic_ids)
+        df_documents = function.read_delta(self.spark, self.path_source_documents)
         return df_documents, df_topic_id
+
+    def load(self, df):
+        function.write_delta(df, self.path_target, mode='overwrite')
 
     def transform(self, data):
         df_documents, df_topic_id = data
 
-        df = df_documents.merge(df_topic_id, how='inner', on='url_id')
-        df = df[df['topic_id'] != -1]
-
-        topic_documents = df.groupby('topic_id').agg({'document': ' '.join})
+        topic_documents = df_documents \
+            .join(df_topic_id, on='url_id', how='inner') \
+            .filter(col('topic_id') != -1) \
+            .groupBy('topic_id') \
+            .agg(concat_ws(' ', collect_list('document')).alias('document')) \
+            .toPandas()
 
         vectorizer_tf = TfidfVectorizer(norm='l1', use_idf=False)
         tf = vectorizer_tf.fit_transform(topic_documents['document'])
@@ -51,14 +58,9 @@ class TopicKeywordEtl(AuditableEtl):
         topic_words = np.array(tokens)[index]
 
         df = pd.DataFrame()
-        df['topic_id'] = topic_documents.index
+        df['topic_id'] = topic_documents['topic_id']
         df['topic_words'] = topic_words.tolist()
 
+        df = self.spark.createDataFrame(df)
+
         return df
-
-    def load(self, data, destination):
-
-        for path in self.path_destination.iterdir():
-            path.unlink()
-
-        data.to_parquet(destination, index=False)

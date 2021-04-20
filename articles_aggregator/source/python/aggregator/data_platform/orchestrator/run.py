@@ -7,13 +7,26 @@ from aggregator.data_platform.orchestrator import solids
 if __name__ == '__main__':
 
     # repository.preset_dev.run_config.pop('solids')
-    #
+
     # dagster.execute_solid(
     #     solids.solid_structured_tutby,
     #     mode_def=repository.mode_local,
     #     input_values={
     #         'path_source': 'raw/html/tutby.delta',
     #         'path_target': 'structured/tutby.delta',
+    #     },
+    #     run_config=repository.preset_dev.run_config
+    # )
+
+    # repository.preset_dev.run_config['solids'] = {'solid_topicwords': {'config': {'path_idf': 'models/idf/idf.csv'}}}
+    #
+    # dagster.execute_solid(
+    #     solids.solid_topicwords,
+    #     mode_def=repository.mode_local,
+    #     input_values={
+    #         'path_source_topic_ids': 'analytics/clustring.delta',
+    #         'path_source_documents': 'analytics/preprocessed.delta',
+    #         'path_target': 'analytics/topicwords.delta',
     #     },
     #     run_config=repository.preset_dev.run_config
     # )

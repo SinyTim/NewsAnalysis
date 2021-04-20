@@ -6,6 +6,7 @@ from aggregator.data_platform.analytics.clustering.clustering_etl import Cluster
 from aggregator.data_platform.analytics.embedding.postprocessing.umap_etl import UmapEtl
 from aggregator.data_platform.analytics.embedding.word2vec_etl import Word2vecEtl
 from aggregator.data_platform.analytics.text_preprocessing.preprocessing_etl import PreprocessingEtl
+from aggregator.data_platform.analytics.topicwords.topic_keyword_etl import TopicKeywordEtl
 from aggregator.data_platform.curated.structured_to_curated_etl import StructuredToCuratedEtl
 from aggregator.data_platform.raw.scraping.scraper import Scraper
 from aggregator.data_platform.raw.scraping.url_generation.generator_date import UrlGeneratorWithDateState
@@ -392,5 +393,31 @@ def solid_clustering(context, path_source: str, path_target: str) -> str:
     }
 
     ClusteringEtl(**params).run()
+
+    return path_target
+
+
+@dagster.solid(
+    required_resource_keys={'datalake', 'pyspark_step_launcher', 'pyspark'},
+    config_schema={
+        'path_idf': dagster.Field(str, is_required=True),
+    },
+)
+def solid_topicwords(context,
+                     path_source_topic_ids: str,
+                     path_source_documents: str,
+                     path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'spark': context.resources.pyspark.spark_session,
+        'path_source_topic_ids': path_lake + path_source_topic_ids,
+        'path_source_documents': path_lake + path_source_documents,
+        'path_target': path_lake + path_target,
+        'path_idf': Path(path_lake + context.solid_config['path_idf']).as_posix().replace('file:/', ''),
+    }
+
+    TopicKeywordEtl(**params).run()
 
     return path_target
