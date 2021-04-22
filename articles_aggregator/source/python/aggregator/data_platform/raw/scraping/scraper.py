@@ -13,8 +13,14 @@ class Scraper(IncrementalDeltaEtl):
 
     def transform(self, df_urls):
 
+        size_partition = 10000
+        n_urls = df_urls.count()
+        n_partitions = n_urls // size_partition
+        n_partitions = max(n_partitions, 1)
+
         # todo set 1 executor with 2 cores
         df_html = df_urls \
+            .repartition(n_partitions) \
             .withColumn('html', get_html('url')) \
             .withColumn('html', get_body('html')) \
             .select(col('id').alias('url_id'), 'html')

@@ -38,7 +38,7 @@ mode_local = dagster.ModeDefinition(
             # 'spark.executor.instances': 1,
             # 'spark.executor.cores': 2,
             # 'spark.executor.memory': '1g',
-            # 'spark.driver.memory': '1g',
+            'spark.driver.memory': '6g',
         }}),
     }
 )
@@ -61,7 +61,7 @@ mode_dataproc = dagster.ModeDefinition(
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
             'spark.sql.execution.arrow.pyspark.enabled': 'true',
             'spark.sql.execution.arrow.maxRecordsPerBatch': 10000,
-            'spark.default.parallelism': 8,
+            # 'spark.default.parallelism': 8,
         }}),
     }
 )

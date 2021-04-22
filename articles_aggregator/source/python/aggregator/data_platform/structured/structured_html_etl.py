@@ -15,6 +15,12 @@ class StructuredHtmlEtl(IncrementalDeltaEtl):
         parser = self.get_parser()
         parse_html = udf(parser, returnType=self.parse_return_type)
 
+        # size_partition = 10
+        # n_urls = df_html.count()
+        # n_partitions = n_urls // size_partition
+        # n_partitions = max(n_partitions, 1)
+        # .repartition(n_partitions) \
+
         df = df_html \
             .withColumn('html', parse_html('html')) \
             .select('url_id', 'html.*')

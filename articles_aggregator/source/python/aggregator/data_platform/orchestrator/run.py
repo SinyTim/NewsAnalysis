@@ -4,7 +4,7 @@ from aggregator.data_platform.orchestrator import repository
 from aggregator.data_platform.orchestrator import solids
 
 
-if __name__ == '__main__':
+def main():
 
     # repository.preset_dev.run_config.pop('solids')
 
@@ -45,3 +45,7 @@ if __name__ == '__main__':
         repository.pipeline_main,
         preset='dev',
     )
+
+
+if __name__ == '__main__':
+    main()
