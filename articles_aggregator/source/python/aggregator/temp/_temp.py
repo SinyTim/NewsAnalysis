@@ -2,6 +2,8 @@ from pathlib import Path
 
 import pandas as pd
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+from pyspark.sql.functions import lit
 
 from aggregator.data_platform.utils.function import read_delta
 from aggregator.data_platform.utils.function import read_parquet
@@ -32,7 +34,7 @@ if __name__ == '__main__':
     #
     # print(df.show(3, True))
 
-    path = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\analytics\embedding.delta')
-    df = read_delta(spark, path)
+    path = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\analytics\topicwords.delta')
+    df = read_delta(spark, path)  # .filter(col('url_id') == lit('7549ab70-a2c5-11eb-b579-e1b220426efd-41032'))
     print(df.count())
-    # print(df.show(5, True))
+    print(df.show(5, False))

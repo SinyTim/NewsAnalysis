@@ -27,7 +27,7 @@ mode_local = dagster.ModeDefinition(
             'spark.sql.catalog.spark_catalog': 'org.apache.spark.sql.delta.catalog.DeltaCatalog',
             'spark.sql.adaptive.enabled': 'true',
             'spark.sql.execution.arrow.pyspark.enabled': 'true',
-            'spark.sql.execution.arrow.maxRecordsPerBatch': 10000,
+            'spark.sql.execution.arrow.maxRecordsPerBatch': 1000,  # because of text preprocessing job.
             # 'spark.default.parallelism': 8,
             'spark.jars': r'C:\Users\Tim\Programs\spark\gcs-connector-hadoop3-latest.jar',
             'spark.hadoop.fs.gs.impl': 'com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem',
