@@ -23,6 +23,10 @@ class UmapEtl(IncrementalDeltaEtl):
             .filter(~array_contains('embedding_document', np.nan)) \
             .toPandas()
 
+        if len(df) == 0:
+            schema = 'url_id string, embedding_document array<double>'
+            return self.spark.createDataFrame([], schema=schema)
+
         embeddings = df['embedding_document'].to_list()
         embeddings = np.array(embeddings, dtype=np.float32)
 
