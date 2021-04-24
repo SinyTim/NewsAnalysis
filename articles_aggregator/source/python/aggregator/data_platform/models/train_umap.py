@@ -6,13 +6,34 @@ import umap
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import array_contains
 
-from aggregator.data_platform.utils import function
+from aggregator.data_platform.utils.model_etl import ModelEtl
+
+
+class UmapModelEtl(ModelEtl):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def transform(self, df):
+
+        embeddings = df \
+            .select('embedding_document') \
+            .filter(~array_contains('embedding_document', np.nan)) \
+            .toPandas()['embedding_document'] \
+            .to_list()
+
+        embeddings = np.array(embeddings, dtype=np.float32)
+
+        model = umap.UMAP(n_neighbors=15, n_components=5, metric='cosine')
+
+        model.fit(embeddings)
+
+    def load(self, model):
+        with open(self.path_model, 'wb') as file:
+            pickle.dump(model, file)
 
 
 def main():
-
-    path_source = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\analytics\embedding.delta')
-    path_model = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\models\umap\umap.pickle')
 
     spark = SparkSession.builder \
         .config('spark.jars.packages', 'io.delta:delta-core_2.12:0.8.0') \
@@ -20,19 +41,13 @@ def main():
         .config('spark.sql.catalog.spark_catalog', 'org.apache.spark.sql.delta.catalog.DeltaCatalog') \
         .getOrCreate()
 
-    embeddings = function.read_delta(spark, path_source) \
-        .select('embedding_document') \
-        .filter(~array_contains('embedding_document', np.nan)) \
-        .toPandas()['embedding_document'].to_list()
+    params = {
+        'path_source': Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\analytics\embedding.delta'),
+        'path_model': Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\models\umap\umap.pickle'),
+        'spark': spark,
+    }
 
-    embeddings = np.array(embeddings, dtype=np.float32)
-
-    model = umap.UMAP(n_neighbors=15, n_components=5, metric='cosine')
-
-    model.fit(embeddings)
-
-    with open(path_model, 'wb') as file:
-        pickle.dump(model, file)
+    UmapModelEtl(**params).run()
 
 
 if __name__ == '__main__':
