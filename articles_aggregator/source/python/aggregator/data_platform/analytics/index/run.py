@@ -3,6 +3,7 @@ from pathlib import Path
 from aggregator.data_platform.analytics.index.index_etl import IndexEtl
 
 
+# todo remove
 def main():
 
     params = {

@@ -7,6 +7,7 @@ from aggregator.data_platform.utils.auditable_etl import AuditableEtl
 from aggregator.data_platform.utils.function import read_parquet
 
 
+# todo refactor
 class IndexEtl(AuditableEtl):
 
     def __init__(self, **kwargs):

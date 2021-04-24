@@ -5,6 +5,7 @@ import pandas as pd
 import psycopg2
 
 
+# todo remove
 class AuditableEtl:
 
     def __init__(self, process_name: str,

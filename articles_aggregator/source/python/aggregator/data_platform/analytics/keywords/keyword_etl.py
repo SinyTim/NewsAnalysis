@@ -6,6 +6,7 @@ from aggregator.data_platform.utils.auditable_etl import AuditableEtl
 from aggregator.data_platform.utils.function import read_parquet
 
 
+# todo refactor
 class KeywordEtl(AuditableEtl):
 
     def __init__(self, path_idf, n_words=5, **kwargs):

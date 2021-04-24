@@ -13,6 +13,7 @@ from aggregator.data_platform.utils.postgres_connection import PostgresConnectio
 from pyspark.sql import SparkSession
 
 
+# todo remove
 def main():
     main_generation()
     main_scraping()

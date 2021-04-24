@@ -3,6 +3,7 @@ from pathlib import Path
 from aggregator.data_platform.analytics.keywords.keyword_etl import KeywordEtl
 
 
+# todo remove
 def main():
 
     params = {
