@@ -36,7 +36,7 @@ class KeywordEtl(AuditableEtl):
 
         tokens = vectorizer_tf.get_feature_names()
 
-        idf = np.array([self.model_word2idf[token] if token in self.model_word2idf else 0.0 for token in tokens])
+        idf = np.array([self.model_word2idf.get(token, 0.0) for token in tokens])
 
         tf_idf = tf * idf
 

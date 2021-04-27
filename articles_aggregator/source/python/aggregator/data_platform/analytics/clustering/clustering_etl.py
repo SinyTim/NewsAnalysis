@@ -32,7 +32,7 @@ class ClusteringEtl:
         embeddings = np.array(embeddings, dtype=np.float32)
 
         cluster = hdbscan.HDBSCAN(
-            min_cluster_size=15,
+            min_cluster_size=150,
             metric='euclidean',
             cluster_selection_method='eom'
         )

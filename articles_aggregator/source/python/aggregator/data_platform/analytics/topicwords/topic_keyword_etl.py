@@ -49,7 +49,7 @@ class TopicKeywordEtl:
         tf = vectorizer_tf.fit_transform(topic_documents['document'])
 
         tokens = vectorizer_tf.get_feature_names()
-        idf = [self.model_word2idf[token] if token in self.model_word2idf else 0.0 for token in tokens]
+        idf = [self.model_word2idf.get(token, 0.0) for token in tokens]
         idf = np.array(idf)
 
         tf_idf = np.multiply(tf.todense(), idf ** 2)
