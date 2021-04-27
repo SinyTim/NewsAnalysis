@@ -29,12 +29,12 @@ solids:
     #      default_start_state: '1'
     #      max_n_fails: 5
 
-      solid_generator_naviny:
-        inputs:
-          path_bad_data: 'bad/urls.delta'
-          path_target: 'raw/url/naviny.delta'
-        config:
-          default_start_state: '2021/04/14'
+#      solid_generator_naviny:
+#        inputs:
+#          path_bad_data: 'bad/urls.delta'
+#          path_target: 'raw/url/naviny.delta'
+#        config:
+#          default_start_state: '2021/04/14'
 
       solid_generator_tutby:
         inputs:
@@ -52,9 +52,9 @@ solids:
     #    inputs:
     #      path_target: 'raw/html/komzdrav.delta'
 
-      solid_scraper_naviny:
-        inputs:
-          path_target: 'raw/html/naviny.delta'
+#      solid_scraper_naviny:
+#        inputs:
+#          path_target: 'raw/html/naviny.delta'
 
       solid_scraper_tutby:
         inputs:
@@ -68,9 +68,9 @@ solids:
     #    inputs:
     #      path_target: 'structured/komzdrav.delta'
 
-      solid_structured_naviny:
-        inputs:
-          path_target: 'structured/naviny.delta'
+#      solid_structured_naviny:
+#        inputs:
+#          path_target: 'structured/naviny.delta'
 
       solid_structured_tutby:
         inputs:
@@ -88,11 +88,11 @@ solids:
     #    inputs:
     #      path_target: 'curated/article.delta'
 
-      solid_curated_naviny:
-        config:
-          process_name: 'curated_naviny'
-        inputs:
-          path_target: 'curated/article.delta'
+#      solid_curated_naviny:
+#        config:
+#          process_name: 'curated_naviny'
+#        inputs:
+#          path_target: 'curated/article.delta'
 
       solid_curated_tutby:
         config:
@@ -121,7 +121,7 @@ solids:
       solid_umap:
         config:
           process_name: 'umap'
-          path_umap: 'models/umap/umap.pickle'
+          path_umap: 'models/umap/_umap.pickle'
         inputs:
           path_target: 'analytics/postprocessing_umap.delta'
 
