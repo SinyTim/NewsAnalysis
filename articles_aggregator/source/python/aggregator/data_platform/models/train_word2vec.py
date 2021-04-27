@@ -34,7 +34,7 @@ class Word2VecModelEtl(ModelEtl):
             'sg': 1,
             'negative': 5,
             'sample': 1e-5,
-            'iter': 2,  # 150
+            'iter': 150,
         }
 
         model = gensim.models.Word2Vec(sentences=documents, **params_word2vec)
@@ -51,6 +51,7 @@ def main():
         .config('spark.jars.packages', 'io.delta:delta-core_2.12:0.8.0') \
         .config('spark.sql.extensions', 'io.delta.sql.DeltaSparkSessionExtension') \
         .config('spark.sql.catalog.spark_catalog', 'org.apache.spark.sql.delta.catalog.DeltaCatalog') \
+        .config('spark.driver.memory', '8g') \
         .getOrCreate()
 
     params = {

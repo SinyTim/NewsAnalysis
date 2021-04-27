@@ -121,7 +121,7 @@ solids:
       solid_umap:
         config:
           process_name: 'umap'
-          path_umap: 'models/umap/_umap.pickle'
+          path_umap: 'models/umap/umap.pickle'
         inputs:
           path_target: 'analytics/postprocessing_umap.delta'
 
