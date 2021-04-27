@@ -42,7 +42,7 @@ solids:
           path_target: 'raw/url/tutby.delta'
         config:
           default_start_state: '527400'
-          max_n_fails: 10
+          max_n_fails: 13
 
     #  solid_scraper_4gkb:
     #    inputs:

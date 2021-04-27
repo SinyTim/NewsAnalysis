@@ -1,3 +1,4 @@
+import collections
 import logging
 
 import pandas as pd
@@ -29,7 +30,11 @@ class UrlGeneratorWithIntState(UrlGenerator):
 
             url = self.get_url_with_state(page_index)
 
-            response = requests.get(url)
+            try:
+                response = requests.get(url)
+            except:
+                # https://news.tut.by/706763.html
+                response = collections.namedtuple('Response', 'url status_code')(None, None)
 
             if (response.status_code == 200) and (response.url != self.bad_response_url):
                 urls += [response.url]

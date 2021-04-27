@@ -38,7 +38,7 @@ mode_local = dagster.ModeDefinition(
             # 'spark.executor.instances': 1,
             # 'spark.executor.cores': 2,
             # 'spark.executor.memory': '1g',
-            'spark.driver.memory': '6g',
+            'spark.driver.memory': '8g',
         }}),
     }
 )

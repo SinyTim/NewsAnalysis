@@ -1,5 +1,6 @@
 from pyspark.sql.functions import col
 from pyspark.sql.functions import udf
+from pyspark.storagelevel import StorageLevel
 
 from aggregator.data_platform.utils.incremental_delta_etl import IncrementalDeltaEtl
 
@@ -15,15 +16,21 @@ class StructuredHtmlEtl(IncrementalDeltaEtl):
         parser = self.get_parser()
         parse_html = udf(parser, returnType=self.parse_return_type)
 
-        # size_partition = 10
-        # n_urls = df_html.count()
-        # n_partitions = n_urls // size_partition
-        # n_partitions = max(n_partitions, 1)
-        # .repartition(n_partitions) \
+        n_partitions_init = df_html.rdd.getNumPartitions()
+
+        size_partition = 10
+        n_htmls = df_html.count()
+        n_partitions = n_htmls // size_partition
+        n_partitions = max(n_partitions, 1)
+
+        df_html = df_html \
+            .repartition(n_partitions) \
+            .persist(storageLevel=StorageLevel.DISK_ONLY)
 
         df = df_html \
             .withColumn('html', parse_html('html')) \
-            .select('url_id', 'html.*')
+            .select('url_id', 'html.*') \
+            .repartition(n_partitions_init)
 
         # df = df.cahce()
 
