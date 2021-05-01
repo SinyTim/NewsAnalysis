@@ -23,7 +23,7 @@ def main():
         write_plot_entire(df_topics, df_frequencies)
 
 
-@st.cache(allow_output_mutation=True)
+@st.cache(allow_output_mutation=False)
 def get_data():
 
     path_lake = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data')
