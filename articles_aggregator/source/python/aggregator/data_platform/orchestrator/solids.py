@@ -14,7 +14,7 @@ from aggregator.data_platform.raw.scraping.url_generation.generator_int import U
 from aggregator.data_platform.structured.medicine import StructuredEtlMedicine
 from aggregator.data_platform.structured.naviny import StructuredEtlNaviny
 from aggregator.data_platform.structured.tutby import StructuredEtlTutby
-from aggregator.data_platform.utils.export_etl import ExportEtl
+from aggregator.data_platform.consumer.export_etl import ExportEtl
 
 
 @dagster.solid(required_resource_keys={'pyspark_step_launcher', 'pyspark'})

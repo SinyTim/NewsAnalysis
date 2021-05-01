@@ -1,53 +1,104 @@
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
 import streamlit as st
 
-from aggregator.front import search
-from aggregator.data_platform.utils.function import read_parquet
 
-
-# streamlit run aggregator/app/topic.py
+# streamlit run aggregator/front/topic.py
 
 
 def main():
-
-    topicwords, data = get_data()
-
     st.title('Topic modeling :mag: :newspaper: :heavy_check_mark:')
 
-    option = st.selectbox('Topic', topicwords.to_numpy(), format_func=lambda record: ', '.join(record[1]))
+    df_topics, df_frequencies, df_article_topic = get_data()
 
-    topic_id = option[0]
+    topic_id = get_topic_id(df_topics)
 
-    data_topic = data[data['topic_id'] == topic_id]
-    data_topic = data_topic.sort_values('time', ascending=False)
-    data_topic = data_topic.head(20)
-
-    for record in data_topic.itertuples():
-        s = fr"\[{record.time}\] [{record.header}]({record.url})"
-        st.info(s)
+    if topic_id:
+        write_plot(df_frequencies, topic_id)
+        write_articles(df_article_topic, topic_id)
+    else:
+        write_plot_entire(df_topics, df_frequencies)
 
 
 @st.cache(allow_output_mutation=True)
 def get_data():
-    path_articles = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\curated\articles')
-    path_topics = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\clustering')
-    path_topicwords = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\analytics\topicwords')
 
-    articles = read_parquet(path_articles)
-    topics = read_parquet(path_topics)
-    topicwords = read_parquet(path_topicwords)
-    urls = search.get_urls(articles['url_id'])
+    path_lake = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data')
 
-    articles = articles.set_index('url_id', drop=False)
-    topics = topics.set_index('url_id')
+    path_topics = path_lake / Path('consumer/topics.parquet')
+    path_frequencies = path_lake / Path('consumer/frequencies.parquet')
+    path_article_topic = path_lake / Path('consumer/article_topic.parquet')
 
-    data = articles.join(topics, how='inner')
-    data = data.join(urls, how='inner')
+    df_topics = pd.read_parquet(path_topics)
+    df_frequencies = pd.read_parquet(path_frequencies)
+    df_article_topic = pd.read_parquet(path_article_topic)
 
-    data = data.sort_values('time', ascending=False)
+    return df_topics, df_frequencies, df_article_topic
 
-    return topicwords, data
+
+def get_topic_id(df_topics):
+
+    n_articles = df_topics['topic_size'].sum()
+    df_topics = df_topics.to_numpy()
+    df_topics = np.insert(df_topics, 0, values=[None, n_articles, ['All']], axis=0)
+
+    format_func = lambda record: ', '.join(record[2]) + f' ({record[1]})'
+    option = st.selectbox('Topic', df_topics, format_func=format_func)
+
+    topic_id = option[0]
+
+    return topic_id
+
+
+def write_plot_entire(df_topics, df_frequencies):
+
+    topic_ids = df_topics['topic_id']
+
+    figure = go.Figure()
+
+    for topic_id in topic_ids:
+        df_topic_frequencies = df_frequencies[df_frequencies['topic_id'] == topic_id]
+
+        max_change = df_topic_frequencies['frequency'].max() - df_topic_frequencies['frequency'].min()
+
+        if max_change > 0.06:
+            topic_words = df_topics[df_topics['topic_id'] == topic_id]['topic_words'].iloc[0]
+            topic_words = topic_words[:3]
+            topic_words = ', '.join(topic_words)
+            figure.add_scatter(x=df_topic_frequencies['time'], y=df_topic_frequencies['frequency'],
+                               mode='lines', name=topic_words)
+
+    figure.update_yaxes(title_text='% of all articles')
+    st.plotly_chart(figure, use_container_width=True)
+
+
+def write_plot(df_frequencies, topic_id):
+
+    df_topic_frequencies = df_frequencies[df_frequencies['topic_id'] == topic_id]
+
+    figure = go.Figure()
+    figure.add_scatter(x=df_topic_frequencies['time'], y=df_topic_frequencies['frequency'],
+                       mode='lines')
+    figure.update_yaxes(title_text='% of all articles')
+    st.plotly_chart(figure, use_container_width=True)
+
+
+def write_articles(df_article_topic, topic_id):
+
+    df_topic = df_article_topic[df_article_topic['topic_id'] == topic_id]
+
+    df_topic = df_topic \
+        .sort_values('time', ascending=False) \
+        .head(7)
+
+    for record in df_topic.itertuples():
+        tags = ', '.join(record.tags)
+        tags = f'({tags})' if tags else ''
+        s = fr"_\[{record.Index}\]_ **{record.header}** {tags}"
+        st.info(s)
 
 
 if __name__ == '__main__':
