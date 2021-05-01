@@ -97,7 +97,7 @@ def write_articles(df_article_topic, topic_id):
     for record in df_topic.itertuples():
         tags = ', '.join(record.tags)
         tags = f'({tags})' if tags else ''
-        s = fr"_\[{record.Index}\]_ **{record.header}** {tags}"
+        s = fr"_\[{record.time}\]_ **{record.header}** {tags}"
         st.info(s)
 
 
