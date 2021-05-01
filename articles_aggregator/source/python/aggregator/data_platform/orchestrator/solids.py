@@ -9,6 +9,7 @@ from aggregator.data_platform.analytics.text_preprocessing.preprocessing_etl imp
 from aggregator.data_platform.analytics.topicwords.topic_keyword_etl import TopicKeywordEtl
 from aggregator.data_platform.consumer.article_topic_etl import ArticleTopicEtl
 from aggregator.data_platform.consumer.frequencies_etl import FrequenciesEtl
+from aggregator.data_platform.consumer.points_etl import PointsEtl
 from aggregator.data_platform.consumer.topics_etl import TopicsEtl
 from aggregator.data_platform.curated.structured_to_curated_etl import StructuredToCuratedEtl
 from aggregator.data_platform.raw.scraping.scraper import Scraper
@@ -477,5 +478,21 @@ def solid_frequencies(context, path_source: str, path_target: str) -> str:
     }
 
     FrequenciesEtl(**params).run()
+
+    return path_target
+
+
+@dagster.solid(required_resource_keys={'datalake', 'pyspark_step_launcher', 'pyspark'})
+def solid_points(context, path_source: str, path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'spark': context.resources.pyspark.spark_session,
+        'path_source': path_lake + path_source,
+        'path_target': path_lake + path_target,
+    }
+
+    PointsEtl(**params).run()
 
     return path_target

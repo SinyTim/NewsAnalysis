@@ -7,13 +7,13 @@ from aggregator.data_platform.orchestrator import solids
 def main():
 
     # repository.preset_dev.run_config.pop('solids')
-
+    #
     # dagster.execute_solid(
-    #     solids.solid_structured_tutby,
+    #     solids.solid_points,
     #     mode_def=repository.mode_local,
     #     input_values={
-    #         'path_source': 'raw/html/tutby.delta',
-    #         'path_target': 'structured/tutby.delta',
+    #         'path_source': 'analytics/embedding.delta',
+    #         'path_target': 'consumer/points.parquet',
     #     },
     #     run_config=repository.preset_dev.run_config
     # )

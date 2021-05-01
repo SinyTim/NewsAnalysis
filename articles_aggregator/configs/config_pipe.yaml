@@ -146,3 +146,7 @@ solids:
       solid_frequencies:
         inputs:
           path_target: 'consumer/frequencies.parquet'
+
+      solid_points:
+        inputs:
+          path_target: 'consumer/points.parquet'
