@@ -6,7 +6,7 @@ import umap
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import array_contains
 
-from aggregator.data_platform.utils.model_etl import ModelEtl
+from aggregator.data_platform.utils.etls.model_etl import ModelEtl
 
 
 class UmapModelEtl(ModelEtl):

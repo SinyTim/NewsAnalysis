@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from pyspark.sql.functions import col
 from pyspark.sql.functions import udf
 
-from aggregator.data_platform.utils.incremental_delta_etl import IncrementalDeltaEtl
+from aggregator.data_platform.utils.etls.incremental_delta_etl import IncrementalDeltaEtl
 
 
 class Scraper(IncrementalDeltaEtl):

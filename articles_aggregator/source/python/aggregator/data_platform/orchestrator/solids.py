@@ -7,6 +7,9 @@ from aggregator.data_platform.analytics.embedding.postprocessing.umap_etl import
 from aggregator.data_platform.analytics.embedding.word2vec_etl import Word2vecEtl
 from aggregator.data_platform.analytics.text_preprocessing.preprocessing_etl import PreprocessingEtl
 from aggregator.data_platform.analytics.topicwords.topic_keyword_etl import TopicKeywordEtl
+from aggregator.data_platform.consumer.article_topic_etl import ArticleTopicEtl
+from aggregator.data_platform.consumer.frequencies_etl import FrequenciesEtl
+from aggregator.data_platform.consumer.topics_etl import TopicsEtl
 from aggregator.data_platform.curated.structured_to_curated_etl import StructuredToCuratedEtl
 from aggregator.data_platform.raw.scraping.scraper import Scraper
 from aggregator.data_platform.raw.scraping.url_generation.generator_date import UrlGeneratorWithDateState
@@ -14,7 +17,7 @@ from aggregator.data_platform.raw.scraping.url_generation.generator_int import U
 from aggregator.data_platform.structured.medicine import StructuredEtlMedicine
 from aggregator.data_platform.structured.naviny import StructuredEtlNaviny
 from aggregator.data_platform.structured.tutby import StructuredEtlTutby
-from aggregator.data_platform.consumer.export_etl import ExportEtl
+from aggregator.data_platform.utils.etls.export_etl import ExportEtl
 
 
 @dagster.solid(required_resource_keys={'pyspark_step_launcher', 'pyspark'})
@@ -419,5 +422,60 @@ def solid_topicwords(context,
     }
 
     TopicKeywordEtl(**params).run()
+
+    return path_target
+
+
+@dagster.solid(required_resource_keys={'datalake', 'pyspark_step_launcher', 'pyspark'})
+def solid_topics(context,
+                 path_source_clustering: str,
+                 path_source_topicwords: str,
+                 path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'spark': context.resources.pyspark.spark_session,
+        'path_source_clustering': path_lake + path_source_clustering,
+        'path_source_topicwords': path_lake + path_source_topicwords,
+        'path_target': path_lake + path_target,
+    }
+
+    TopicsEtl(**params).run()
+
+    return path_target
+
+
+@dagster.solid(required_resource_keys={'datalake', 'pyspark_step_launcher', 'pyspark'})
+def solid_article_topic(context,
+                        path_source_article: str,
+                        path_source_clustering: str,
+                        path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'spark': context.resources.pyspark.spark_session,
+        'path_source_article': path_lake + path_source_article,
+        'path_source_clustering': path_lake + path_source_clustering,
+        'path_target': path_lake + path_target,
+    }
+
+    ArticleTopicEtl(**params).run()
+
+    return path_target
+
+
+@dagster.solid(required_resource_keys={'datalake'})
+def solid_frequencies(context, path_source: str, path_target: str) -> str:
+
+    path_lake = context.resources.datalake
+
+    params = {
+        'path_source': path_lake + path_source,
+        'path_target': path_lake + path_target,
+    }
+
+    FrequenciesEtl(**params).run()
 
     return path_target

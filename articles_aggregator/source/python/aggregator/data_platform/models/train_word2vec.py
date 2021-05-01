@@ -5,7 +5,7 @@ from pathlib import Path
 import gensim
 from pyspark.sql import SparkSession
 
-from aggregator.data_platform.utils.model_etl import ModelEtl
+from aggregator.data_platform.utils.etls.model_etl import ModelEtl
 
 
 class Word2VecModelEtl(ModelEtl):

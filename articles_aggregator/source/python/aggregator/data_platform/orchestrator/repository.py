@@ -130,12 +130,19 @@ def composite_curated() -> str:
 
 @dagster.composite_solid
 def composite_analytics(path_curated: str):
+
     path_preprocessed = solids.solid_preprocessing(path_source=path_curated)
     path_embeddings = solids.solid_word2vec(path_source=path_preprocessed)
     path_umap = solids.solid_umap(path_source=path_embeddings)
     path_clustering = solids.solid_clustering(path_source=path_umap)
     path_topicwords = solids.solid_topicwords(path_source_topic_ids=path_clustering,
                                               path_source_documents=path_preprocessed)
+
+    path_topics = solids.solid_topics(path_source_clustering=path_clustering,
+                                      path_source_topicwords=path_topicwords)
+    path_article_topic = solids.solid_article_topic(path_source_article=path_curated,
+                                                    path_source_clustering=path_clustering)
+    path_frequencies = solids.solid_frequencies(path_source=path_article_topic)
 
 
 @dagster.pipeline(

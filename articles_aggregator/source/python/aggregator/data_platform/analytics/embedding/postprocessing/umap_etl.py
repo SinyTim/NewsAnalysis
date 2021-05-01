@@ -3,7 +3,7 @@ import pickle
 import numpy as np
 from pyspark.sql.functions import array_contains
 
-from aggregator.data_platform.utils.incremental_delta_etl import IncrementalDeltaEtl
+from aggregator.data_platform.utils.etls.incremental_delta_etl import IncrementalDeltaEtl
 
 
 class UmapEtl(IncrementalDeltaEtl):

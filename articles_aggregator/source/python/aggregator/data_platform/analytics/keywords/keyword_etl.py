@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from aggregator.data_platform.utils.auditable_etl import AuditableEtl
+from aggregator.data_platform.utils.etls.auditable_etl import AuditableEtl
 from aggregator.data_platform.utils.function import read_parquet
 
 

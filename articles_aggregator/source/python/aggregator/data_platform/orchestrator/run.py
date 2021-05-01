@@ -24,7 +24,7 @@ def main():
     #     solids.solid_topicwords,
     #     mode_def=repository.mode_local,
     #     input_values={
-    #         'path_source_topic_ids': 'analytics/clustring.delta',
+    #         'path_source_topic_ids': 'analytics/clustering.delta',
     #         'path_source_documents': 'analytics/preprocessed.delta',
     #         'path_target': 'analytics/topicwords.delta',
     #     },

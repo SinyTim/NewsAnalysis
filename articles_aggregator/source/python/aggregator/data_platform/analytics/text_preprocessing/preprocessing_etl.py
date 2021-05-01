@@ -6,7 +6,7 @@ import pandas as pd
 import pymystem3
 from pyspark.sql.functions import pandas_udf
 
-from aggregator.data_platform.utils.incremental_delta_etl import IncrementalDeltaEtl
+from aggregator.data_platform.utils.etls.incremental_delta_etl import IncrementalDeltaEtl
 
 
 class PreprocessingEtl(IncrementalDeltaEtl):

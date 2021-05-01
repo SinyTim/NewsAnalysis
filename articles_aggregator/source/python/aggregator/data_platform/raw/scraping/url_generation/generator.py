@@ -2,7 +2,7 @@ import pandas as pd
 from pyspark.sql.functions import current_timestamp
 
 from aggregator.data_platform.utils import function
-from aggregator.data_platform.utils.incremental_etl import IncrementalEtl
+from aggregator.data_platform.utils.etls.incremental_etl import IncrementalEtl
 
 
 class UrlGenerator(IncrementalEtl):

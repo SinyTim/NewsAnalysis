@@ -4,7 +4,7 @@ import pandas as pd
 from pyspark.sql import SparkSession
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from aggregator.data_platform.utils.model_etl import ModelEtl
+from aggregator.data_platform.utils.etls.model_etl import ModelEtl
 
 
 class IdfModelEtl(ModelEtl):

@@ -5,7 +5,7 @@ from pyspark.sql.functions import udf
 from pyspark.sql.types import ArrayType
 from pyspark.sql.types import FloatType
 
-from aggregator.data_platform.utils.incremental_delta_etl import IncrementalDeltaEtl
+from aggregator.data_platform.utils.etls.incremental_delta_etl import IncrementalDeltaEtl
 
 
 class Word2vecEtl(IncrementalDeltaEtl):

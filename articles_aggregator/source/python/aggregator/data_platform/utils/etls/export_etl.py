@@ -1,17 +1,13 @@
 from aggregator.data_platform.utils import function
+from aggregator.data_platform.utils.etls.etl import Etl
 
 
-class ExportEtl:
+class ExportEtl(Etl):
 
     def __init__(self, spark, path_source, path_target):
         self.spark = spark
         self.path_source = path_source
         self.path_target = path_target
-
-    def run(self):
-        df = self.extract()
-        df = self.transform(df)
-        self.load(df)
 
     def extract(self):
         return function.read_delta(self.spark, self.path_source)

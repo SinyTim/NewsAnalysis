@@ -127,10 +127,22 @@ solids:
 
       solid_clustering:
         inputs:
-          path_target: 'analytics/clustring.delta'
+          path_target: 'analytics/clustering.delta'
 
       solid_topicwords:
         config:
           path_idf: 'models/idf/idf.csv'
         inputs:
           path_target: 'analytics/topicwords.delta'
+
+      solid_topics:
+        inputs:
+          path_target: 'consumer/topics.parquet'
+
+      solid_article_topic:
+        inputs:
+          path_target: 'consumer/article_topic.parquet'
+
+      solid_frequencies:
+        inputs:
+          path_target: 'consumer/frequencies.parquet'
