@@ -13,14 +13,13 @@ import streamlit as st
 def main():
     df_topics, df_frequencies, df_article_topic, df_points = get_data()
 
-    st.title('Topic modeling :mag: :newspaper: :heavy_check_mark:')
-
     tabs = ['Topics', 'Points']
     option_tab = st.sidebar.radio('Navigation', tabs)
 
-    if option_tab == tabs[0]:
+    st.title('Topic modeling :mag: :newspaper: :heavy_check_mark:')
+    topic_id = get_topic_id(df_topics)
 
-        topic_id = get_topic_id(df_topics)
+    if option_tab == tabs[0]:
 
         if topic_id:
             write_plot(df_frequencies, topic_id)
@@ -29,7 +28,7 @@ def main():
             write_plot_entire(df_topics, df_frequencies)
 
     elif option_tab == tabs[1]:
-        write_plot_points(df_points, df_article_topic, df_topics)
+        write_plot_points(df_points, df_article_topic, df_topics, topic_id)
 
 
 @st.cache(allow_output_mutation=False)
@@ -112,13 +111,15 @@ def write_articles(df_article_topic, topic_id):
         st.info(s)
 
 
-def write_plot_points(df_points, df_article_topic, df_topics):
+def write_plot_points(df_points, df_article_topic, df_topics, topic_id):
 
-    df = df_points \
+    df_entire = df_points \
         .merge(df_article_topic, on='url_id') \
         .merge(df_topics, on='topic_id')
 
-    df = df.sample(10000)
+    df_topic = df_entire[df_entire['topic_id'] == topic_id]
+    df_not_topic = df_entire[df_entire['topic_id'] != topic_id]
+    df = df_not_topic.sample(5000).append(df_topic)
 
     points = df['point'].to_list()
     points = np.array(points)
@@ -129,15 +130,17 @@ def write_plot_points(df_points, df_article_topic, df_topics):
         'topic': df['topic_words'],
     }
 
+    color = (df['topic_id'] == topic_id) if topic_id else df['topic_id']
+
     figure = px.scatter(
         x=points[:, 0],
         y=points[:, 1],
-        color=df['topic_id'],
+        color=color,
         color_continuous_scale=px.colors.cyclical.IceFire,
         hover_data=hover_data,
     )
 
-    figure.update_traces(marker=dict(size=4))
+    figure.update_traces(marker=dict(size=4), showlegend=False)
     st.plotly_chart(figure, use_container_width=True)
 
 
