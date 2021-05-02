@@ -24,7 +24,7 @@ class ArticleTopicEtl(LoadParquetEtl):
 
         df_article_topic = df_article \
             .join(df_clustering, on='url_id') \
-            .select('time', 'header', 'tags', 'topic_id') \
+            .select('time', 'header', 'tags', 'topic_id', 'url_id') \
             .filter(col('topic_id') != -1) \
             .orderBy('time') \
             .toPandas()

@@ -2,6 +2,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -10,17 +11,25 @@ import streamlit as st
 
 
 def main():
+    df_topics, df_frequencies, df_article_topic, df_points = get_data()
+
     st.title('Topic modeling :mag: :newspaper: :heavy_check_mark:')
 
-    df_topics, df_frequencies, df_article_topic = get_data()
+    tabs = ['Topics', 'Points']
+    option_tab = st.sidebar.radio('Navigation', tabs)
 
-    topic_id = get_topic_id(df_topics)
+    if option_tab == tabs[0]:
 
-    if topic_id:
-        write_plot(df_frequencies, topic_id)
-        write_articles(df_article_topic, topic_id)
-    else:
-        write_plot_entire(df_topics, df_frequencies)
+        topic_id = get_topic_id(df_topics)
+
+        if topic_id:
+            write_plot(df_frequencies, topic_id)
+            write_articles(df_article_topic, topic_id)
+        else:
+            write_plot_entire(df_topics, df_frequencies)
+
+    elif option_tab == tabs[1]:
+        write_plot_points(df_points, df_article_topic, df_topics)
 
 
 @st.cache(allow_output_mutation=False)
@@ -31,12 +40,14 @@ def get_data():
     path_topics = path_lake / Path('consumer/topics.parquet')
     path_frequencies = path_lake / Path('consumer/frequencies.parquet')
     path_article_topic = path_lake / Path('consumer/article_topic.parquet')
+    path_points = path_lake / Path('consumer/points.parquet')
 
     df_topics = pd.read_parquet(path_topics)
     df_frequencies = pd.read_parquet(path_frequencies)
     df_article_topic = pd.read_parquet(path_article_topic)
+    df_points = pd.read_parquet(path_points)
 
-    return df_topics, df_frequencies, df_article_topic
+    return df_topics, df_frequencies, df_article_topic, df_points
 
 
 def get_topic_id(df_topics):
@@ -99,6 +110,35 @@ def write_articles(df_article_topic, topic_id):
         tags = f'({tags})' if tags else ''
         s = fr"_\[{record.time}\]_ **{record.header}** {tags}"
         st.info(s)
+
+
+def write_plot_points(df_points, df_article_topic, df_topics):
+
+    df = df_points \
+        .merge(df_article_topic, on='url_id') \
+        .merge(df_topics, on='topic_id')
+
+    df = df.sample(10000)
+
+    points = df['point'].to_list()
+    points = np.array(points)
+
+    hover_data = {
+        'header': df['header'],
+        'tags': df['tags'],
+        'topic': df['topic_words'],
+    }
+
+    figure = px.scatter(
+        x=points[:, 0],
+        y=points[:, 1],
+        color=df['topic_id'],
+        color_continuous_scale=px.colors.cyclical.IceFire,
+        hover_data=hover_data,
+    )
+
+    figure.update_traces(marker=dict(size=4))
+    st.plotly_chart(figure, use_container_width=True)
 
 
 if __name__ == '__main__':
