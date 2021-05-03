@@ -2,48 +2,39 @@ from pathlib import Path
 
 import faiss
 import numpy as np
+from pyspark.sql.functions import array_contains
 
-from aggregator.data_platform.utils.etls.auditable_etl import AuditableEtl
-from aggregator.data_platform.utils.function import read_parquet
+from aggregator.data_platform.utils.etls.incremental_delta_etl import IncrementalDeltaEtl
 
 
-# todo refactor
-class IndexEtl(AuditableEtl):
+# todo
+class IndexEtl(IncrementalDeltaEtl):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.name_index = 'index.faiss'
-        self.name_column_document = 'embedding_document'
-        self.name_column_label = 'url_id'
+    def transform(self, df):
 
-    def extract(self, path_embeddings):
+        df = df.select('url_id', 'embedding_document') \
+            .filter(~array_contains('embedding_document', np.nan)) \
+            .toPandas()
 
-        data = read_parquet(paths=path_embeddings)
-
-        path_index = self.get_destination()
-        index = faiss.read_index(path_index) if Path(path_index).exists() else None
-
-        return data, index
-
-    def transform(self, data):
-        data, index = data
-
-        embeddings = data[self.name_column_document].tolist()
+        embeddings = df['embedding_document'].tolist()
         embeddings = np.array(embeddings, dtype=np.float32)
-        labels = data[self.name_column_label].to_numpy()
 
-        if not index:
+        labels = df['url_id'].to_numpy()
+
+        if Path(self.path_target).exists():
+            index = faiss.read_index(self.path_target)
+        else:
             dim = embeddings.shape[1]
             index = faiss.index_factory(dim, 'IDMap,L2norm,Flat')
 
+        # labels must be int64
+        # labels = np.arange(len(embeddings)).astype(np.int64)
         index.add_with_ids(embeddings, labels)
 
         return index
 
-    def load(self, index, path_index):
-        faiss.write_index(index, str(path_index))
-
-    def get_destination(self):
-        path = self.path_destination / self.name_index
-        return path.as_posix()
+    def load(self, index):
+        faiss.write_index(index, str(self.path_target))

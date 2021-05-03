@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 
 
+# todo move
 def repartition_delta(spark, path, n_partitions):
 
     spark \

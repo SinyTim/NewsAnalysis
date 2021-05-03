@@ -6,6 +6,7 @@ import numpy as np
 from aggregator.data_platform.utils import read_dir_parquet
 
 
+# todo
 if __name__ == '__main__':
 
     path_index = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\data\_data\model\index\index.faiss')
