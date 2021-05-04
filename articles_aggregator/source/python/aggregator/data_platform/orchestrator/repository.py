@@ -141,7 +141,8 @@ def composite_analytics(path_curated: str):
     path_topics = solids.solid_topics(path_source_clustering=path_clustering,
                                       path_source_topicwords=path_topicwords)
     path_article_topic = solids.solid_article_topic(path_source_article=path_curated,
-                                                    path_source_clustering=path_clustering)
+                                                    path_source_clustering=path_clustering,
+                                                    path_source_embeddings=path_embeddings)
     path_frequencies = solids.solid_frequencies(path_source=path_article_topic)
     path_points = solids.solid_points(path_source=path_embeddings)
 

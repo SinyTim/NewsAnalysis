@@ -20,8 +20,8 @@ class FrequenciesEtl(LoadParquetEtl):
     def transform(self, df_article_topic):
 
         df_article_topic = df_article_topic.set_index('time')
-        ts_entire = df_article_topic.resample(self.resample_period)['header'].count()
-        ts_topics = df_article_topic.groupby('topic_id').resample(self.resample_period)['header'].count()
+        ts_entire = df_article_topic.resample(self.resample_period)['url_id'].count()
+        ts_topics = df_article_topic.groupby('topic_id').resample(self.resample_period)['url_id'].count()
 
         topic_ids = df_article_topic['topic_id'].unique()
 
@@ -32,7 +32,7 @@ class FrequenciesEtl(LoadParquetEtl):
             ts_entire_indexed = ts_entire[ts_topic.index]
             ts = ts_topic / ts_entire_indexed
             ts = ts[ts_entire > self.min_n_articles_per_period]
-            df = ts.reset_index().assign(**{'topic_id': topic_id}).rename(columns={'header': 'frequency'})
+            df = ts.reset_index().assign(**{'topic_id': topic_id}).rename(columns={'url_id': 'frequency'})
             df_frequencies = df_frequencies.append(df, ignore_index=True)
 
         return df_frequencies

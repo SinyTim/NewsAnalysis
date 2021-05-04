@@ -10,7 +10,7 @@ from aggregator.data_platform.utils.function import read_parquet
 
 
 # todo
-# streamlit run aggregator/app/search.py
+# streamlit run aggregator/front/search.py
 
 
 def main():

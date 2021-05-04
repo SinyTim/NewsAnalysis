@@ -7,7 +7,7 @@ from aggregator.data_platform.analytics.embedding.postprocessing.umap_etl import
 from aggregator.data_platform.analytics.embedding.word2vec_etl import Word2vecEtl
 from aggregator.data_platform.analytics.text_preprocessing.preprocessing_etl import PreprocessingEtl
 from aggregator.data_platform.analytics.topicwords.topic_keyword_etl import TopicKeywordEtl
-from aggregator.data_platform.consumer.article_topic_etl import ArticleTopicEtl
+from aggregator.data_platform.consumer.article_etl import ArticleEtl
 from aggregator.data_platform.consumer.frequencies_etl import FrequenciesEtl
 from aggregator.data_platform.consumer.points_etl import PointsEtl
 from aggregator.data_platform.consumer.topics_etl import TopicsEtl
@@ -451,6 +451,7 @@ def solid_topics(context,
 def solid_article_topic(context,
                         path_source_article: str,
                         path_source_clustering: str,
+                        path_source_embeddings: str,
                         path_target: str) -> str:
 
     path_lake = context.resources.datalake
@@ -459,10 +460,11 @@ def solid_article_topic(context,
         'spark': context.resources.pyspark.spark_session,
         'path_source_article': path_lake + path_source_article,
         'path_source_clustering': path_lake + path_source_clustering,
+        'path_source_embeddings': path_lake + path_source_embeddings,
         'path_target': path_lake + path_target,
     }
 
-    ArticleTopicEtl(**params).run()
+    ArticleEtl(**params).run()
 
     return path_target
 
