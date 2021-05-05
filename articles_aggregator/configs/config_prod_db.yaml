@@ -1,9 +1,0 @@
-
-resources:
-  database:
-    config:
-      host: '34.123.127.77'
-      port: 5432
-      db_name: 'prod_dbaudit'
-      user_name: 'postgres'
-      user_password: 'P@ssw0rd'

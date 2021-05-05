@@ -1,5 +1,0 @@
-
-resources:
-  datalake:
-    config:
-      path: 'gs://bct-aggr/datalake/'
