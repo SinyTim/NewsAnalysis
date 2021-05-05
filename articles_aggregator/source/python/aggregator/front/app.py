@@ -17,11 +17,15 @@ def main():
     tabs = ['Topics', 'Similarity search', 'Article points']
     option_tab = st.sidebar.radio('Navigation', tabs)
 
+    st.sidebar.markdown('_Data sources: tut.by, naviny.online_')
+
     st.title('Topic modeling :mag: :newspaper: :heavy_check_mark:')
 
     topic_id = get_topic_id(df_topics)
 
     if option_tab == tabs[0]:
+
+        st.subheader('Topic popularity over time:')
 
         if topic_id:
             write_plot(df_frequencies, topic_id)
@@ -91,7 +95,7 @@ def write_plot_entire(df_topics, df_frequencies):
             figure.add_scatter(x=df_topic_frequencies['time'], y=df_topic_frequencies['frequency'],
                                mode='lines', name=topic_words)
 
-    figure.update_yaxes(title_text='% of all articles')
+    figure.update_yaxes(title_text='fraction of all articles')
     st.plotly_chart(figure, use_container_width=True)
 
 
@@ -102,7 +106,7 @@ def write_plot(df_frequencies, topic_id):
     figure = go.Figure()
     figure.add_scatter(x=df_topic_frequencies['time'], y=df_topic_frequencies['frequency'],
                        mode='lines')
-    figure.update_yaxes(title_text='% of all articles')
+    figure.update_yaxes(title_text='fraction of all articles')
     st.plotly_chart(figure, use_container_width=True)
 
 
@@ -148,7 +152,7 @@ def write_plot_points(df_article_topic, topic_id):
 
     figure.update_traces(marker=dict(size=4), showlegend=False)
 
-    st.write('Each point is an article in a semantic space.')
+    st.subheader('Each point is an article in a semantic space.')
     st.plotly_chart(figure, use_container_width=True)
 
 
