@@ -36,4 +36,7 @@ class ArticleEtl(LoadParquetEtl):
             .orderBy('time') \
             .toPandas()
 
+        n_articles = 50000
+        df_article_topic = df_article_topic.iloc[-n_articles:]
+
         return df_article_topic

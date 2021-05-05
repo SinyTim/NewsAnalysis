@@ -469,13 +469,16 @@ def solid_article_topic(context,
     return path_target
 
 
-@dagster.solid(required_resource_keys={'datalake'})
-def solid_frequencies(context, path_source: str, path_target: str) -> str:
+@dagster.solid(required_resource_keys={'datalake', 'pyspark_step_launcher', 'pyspark'})
+def solid_frequencies(context, path_source_article: str, path_source_clustering: str,
+                      path_target: str) -> str:
 
     path_lake = context.resources.datalake
 
     params = {
-        'path_source': path_lake + path_source,
+        'spark': context.resources.pyspark.spark_session,
+        'path_source_article': path_lake + path_source_article,
+        'path_source_clustering': path_lake + path_source_clustering,
         'path_target': path_lake + path_target,
     }
 
