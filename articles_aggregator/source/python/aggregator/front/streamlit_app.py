@@ -8,7 +8,7 @@ import scipy.spatial
 import streamlit as st
 
 
-# streamlit run aggregator/front/app.py
+# streamlit run streamlit_app.py
 
 
 def main():
@@ -43,12 +43,12 @@ def main():
 @st.cache(allow_output_mutation=True, persist=False, show_spinner=False)
 def get_data():
 
-    path_lake = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data')
+    path_base = Path(r'C:\Users\Tim\Documents\GitHub\NewsAnalysis\articles_aggregator\data\_data\consumer')
 
-    path_topics = path_lake / Path('consumer/topics.parquet')
-    path_frequencies = path_lake / Path('consumer/frequencies.parquet')
-    path_article_topic = path_lake / Path('consumer/article_topic.parquet')
-    path_points = path_lake / Path('consumer/points.parquet')
+    path_topics = path_base / 'topics.parquet'
+    path_frequencies = path_base / 'frequencies.parquet'
+    path_article_topic = path_base / 'article_topic.parquet'
+    path_points = path_base / 'points.parquet'
 
     df_topics = pd.read_parquet(path_topics)
     df_frequencies = pd.read_parquet(path_frequencies)
