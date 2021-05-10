@@ -1,5 +1,7 @@
 import pandas as pd
+from pyspark.sql.functions import col
 from pyspark.sql.functions import current_timestamp
+from pyspark.sql.functions import floor
 
 from aggregator.data_platform.utils import function
 from aggregator.data_platform.utils.etls.incremental_etl import IncrementalEtl
@@ -32,6 +34,7 @@ class UrlGenerator(IncrementalEtl):
         df_urls, df_urls_bad = data
 
         if not df_urls.empty:
+            df_urls = self.spark.createDataFrame(df_urls)
             self.load_good(df_urls)
 
         # if not df_urls_bad.empty:
@@ -40,11 +43,15 @@ class UrlGenerator(IncrementalEtl):
     def load_good(self, df_urls: pd.DataFrame):
         # todo merge by url
 
-        df_urls = self.spark \
-            .createDataFrame(df_urls) \
-            .withColumn('_time_updated', current_timestamp())
+        period_seconds = 10 * 24 * 60 * 60
+        column_timestamp = col('_time_updated').cast('bigint')
+        column_period = floor(column_timestamp / period_seconds)
 
-        function.write_delta(df_urls, self.path_target)
+        df_urls = df_urls \
+            .withColumn('_time_updated', current_timestamp()) \
+            .withColumn('_time_updated_period', column_period)
+
+        function.write_delta(df_urls, self.path_target, name_column_partition='_time_updated_period')
 
     # def load_bad(self, df_urls_bad: pd.DataFrame):
     #     df_urls = self.spark.createDataFrame(df_urls_bad)
