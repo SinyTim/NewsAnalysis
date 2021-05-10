@@ -28,7 +28,7 @@ class IncrementalDeltaEtl(IncrementalEtl, ABC):
         start_state_period = int(start_state_parsed) // self.period_seconds
 
         df = function.read_delta(self.spark, self.path_source) \
-            .filter(col('_time_updated_period') > lit(start_state_period)) \
+            .filter(col('_time_updated_period') >= lit(start_state_period)) \
             .filter(col('_time_updated') > lit(start_state))
 
         stop_state = df \
