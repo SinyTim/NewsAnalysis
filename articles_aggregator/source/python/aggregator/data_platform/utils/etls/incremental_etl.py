@@ -57,4 +57,4 @@ class IncrementalEtl(ABC):
         return state
 
     def state_to_str(self, state) -> str:
-        return state
+        return str(state)

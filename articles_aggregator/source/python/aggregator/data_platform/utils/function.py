@@ -10,9 +10,15 @@ def read_delta(spark, path):
         .load(str(path))
 
 
-def write_delta(df, path, mode='append'):
-    df.write \
-        .format('delta') \
+def write_delta(df, path, mode='append', name_column_partition=None):
+
+    writer = df.write \
+        .format('delta')
+
+    if name_column_partition:
+        writer = writer.partitionBy(name_column_partition)
+
+    writer \
         .mode(mode) \
         .save(str(path))
 
