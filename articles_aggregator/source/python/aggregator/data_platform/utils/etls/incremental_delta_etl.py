@@ -13,7 +13,7 @@ from aggregator.data_platform.utils.etls.incremental_etl import IncrementalEtl
 class IncrementalDeltaEtl(IncrementalEtl, ABC):
 
     def __init__(self, spark, path_source, path_target, **kwargs):
-        super().__init__(**kwargs, default_start_state='1677-09-21 00:12:43.145225')
+        super().__init__(**kwargs, default_start_state='1971-01-01 00:00:00.000000')
 
         self.spark = spark
         self.path_source = path_source
