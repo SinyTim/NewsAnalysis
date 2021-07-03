@@ -3,7 +3,7 @@
 Mass media analysis with topic modeling based on document embeddings.
 
 Stack:
-- Python (pandas, beautifulsoup4, nltk, pymystem3)
+- Python (pandas, numpy, gensim, hdbscan, sklearn, beautifulsoup4, nltk, pymystem3)
 - PySpark (ETLs)
 - Dagster (orchestration)
 - Delta Lake (main storage)
